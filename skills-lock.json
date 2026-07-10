@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "9f98aca777d2e2dea552edbd87a76d92a219c63e0ca8cac052d92acef562e7bc"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "93f53fd1c0352d3d7ec17b8f73d7351bf76f4821e55d123c9d2abc2c53ba48e4"
+    },
+    "fullstack-dev": {
+      "source": "minimax-ai/skills",
+      "sourceType": "github",
+      "skillPath": "skills/fullstack-dev/SKILL.md",
+      "computedHash": "e901a7302603fbc1c3f2a520feaaf8fead3c25dba8b77411f2f9593353b89959"
+    },
+    "fullstack-guardian": {
+      "source": "jeffallan/claude-skills",
+      "sourceType": "github",
+      "skillPath": "skills/fullstack-guardian/SKILL.md",
+      "computedHash": "44019dea8ef287894c7bbcae244797d7b2b0ae536648483585302c21f1d628eb"
+    },
+    "project-graveyard": {
+      "source": "shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "skillPath": "awesome_agent_skills/project-graveyard/SKILL.md",
+      "computedHash": "b11069074f9539c63237e71174dcd1a9011d61033e37c1dcaeab3a208c8b5540"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "90739ddf380aa66d4fff7ba7767a0a6537a1e8287e5c5c408676e0a9e6b2c21d"
+    },
+    "webapp-testing": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/webapp-testing/SKILL.md",
+      "computedHash": "3f14af7f5690695209c22fbf8c8d133769a86d64892602c09bb13f135e14e857"
+    }
+  }
+}
