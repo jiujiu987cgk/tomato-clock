@@ -110,8 +110,7 @@ body::after {
     width: 100%;
     max-width: 393px;
     margin: 0 auto;
-    background: var(--page-bg, linear-gradient(180deg, #FFFBF7 0%, #FDF0FF 30%, #FFF0F0 60%, #FFFBF7 100%));
-    background-attachment: local;
+    background-color: var(--color-cream-white, #FFFBF7);
     border-radius: 0;
     box-shadow: none;
     overflow-x: hidden;
