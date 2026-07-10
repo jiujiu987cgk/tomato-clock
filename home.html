@@ -1490,8 +1490,20 @@
         
         function startTimer() {
             isRunning = true;
-            document.querySelector('.btn-main svg polygon').setAttribute('points', '18,12 18,36');
-            document.querySelector('.btn-main svg polygon').setAttribute('fill', 'white');
+            // 显示暂停图标（两个竖条）
+            const svg = document.querySelector('.btn-main svg');
+            // 清除所有子元素
+            while (svg.firstChild) svg.removeChild(svg.firstChild);
+            // 创建第一个竖条
+            const bar1 = document.createElement('polygon');
+            bar1.setAttribute('points', '16,12 16,36 21,36 21,12');
+            bar1.setAttribute('fill', 'white');
+            svg.appendChild(bar1);
+            // 创建第二个竖条
+            const bar2 = document.createElement('polygon');
+            bar2.setAttribute('points', '27,12 27,36 32,36 32,12');
+            bar2.setAttribute('fill', 'white');
+            svg.appendChild(bar2);
             
             const hamster = document.querySelector('.hamster-container');
             hamster.classList.remove('idle');
@@ -1518,7 +1530,13 @@
             isRunning = false;
             if (timer) clearInterval(timer);
             
-            document.querySelector('.btn-main svg polygon').setAttribute('points', '18,12 38,24 18,36');
+            // 恢复为播放图标（三角形）
+            const svg = document.querySelector('.btn-main svg');
+            while (svg.firstChild) svg.removeChild(svg.firstChild);
+            const playIcon = document.createElement('polygon');
+            playIcon.setAttribute('points', '16,10 38,24 16,38');
+            playIcon.setAttribute('fill', 'white');
+            svg.appendChild(playIcon);
             
             const hamster = document.querySelector('.hamster-container');
             hamster.classList.remove('running');
@@ -1751,6 +1769,7 @@
         let musicProgress = 0;
         let musicTimer = null;
         let musicDuration = 1800;
+        let musicStartTime = 0;
         let currentTrackIndex = 0;
         let localTrackName = '';
         let localAudioEl = null;
@@ -2121,9 +2140,12 @@
                         isMusicPlaying = true;
                         icon.innerHTML = '<rect x="4" y="2" width="3" height="12" fill="white"/><rect x="9" y="2" width="3" height="12" fill="white"/>';
                         musicProgress = 0;
+                        musicStartTime = Date.now();
                         updateMusicProgress();
                         musicTimer = setInterval(() => {
-                            musicProgress++;
+                            // 基于实际经过时间更新进度
+                            const elapsed = Math.floor((Date.now() - musicStartTime) / 1000);
+                            musicProgress = elapsed;
                             updateMusicProgress();
                             if (musicProgress >= musicDuration) {
                                 nextTrack();
@@ -2221,10 +2243,19 @@
                 document.getElementById('music-title').textContent = '🎵 ' + localTrackName;
                 document.getElementById('music-desc').textContent = '本地音乐';
                 
+                // 默认时长
+                musicDuration = 1800;
+                musicProgress = 0;
+                document.getElementById('music-duration').textContent = formatTime(musicDuration);
+                updateMusicProgress();
+                
                 localAudioEl.addEventListener('loadedmetadata', () => {
-                    musicDuration = Math.floor(localAudioEl.duration) || 1800;
+                    if (localAudioEl.duration && isFinite(localAudioEl.duration)) {
+                        musicDuration = Math.floor(localAudioEl.duration);
+                    }
                     musicProgress = 0;
-                    updateMusicUI();
+                    document.getElementById('music-duration').textContent = formatTime(musicDuration);
+                    updateMusicProgress();
                 });
                 
                 localAudioEl.addEventListener('timeupdate', () => {
@@ -2234,9 +2265,14 @@
                     }
                 });
                 
-                if (isMusicPlaying) {
-                    localAudioEl.play();
-                }
+                localAudioEl.addEventListener('ended', () => {
+                    // 本地音乐循环播放，重置进度
+                    musicProgress = 0;
+                    updateMusicProgress();
+                });
+                
+                // 显示本地音乐标题和时长
+                showToast('已选择本地音乐: ' + localTrackName + ' 🎵');
             }
             e.target.value = '';
         }
