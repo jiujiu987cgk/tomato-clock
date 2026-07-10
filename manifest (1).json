@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "description": "tomato-clock",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "tomato-clock",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "tomato-clock",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "lang": "zh"
+}
