@@ -53,6 +53,11 @@
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
     font-family: var(--font-family-display);
     background-color: var(--bg-primary);
@@ -68,7 +73,7 @@ body {
         radial-gradient(ellipse at 70% 12%, var(--body-glow-7, rgba(206, 223, 159, 0.1)) 0%, transparent 500px);
     background-repeat: no-repeat;
     background-size: 100% 100%;
-    background-attachment: scroll;
+    background-attachment: fixed;
     position: relative;
 }
 
@@ -113,13 +118,25 @@ body::after {
     background-color: transparent;
     border-radius: 0;
     box-shadow: none;
-    overflow-x: hidden;
+    overflow: hidden;
     position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .content-area {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.scrollable-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 100px;
 }
 
 .page-container::before {
