@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务规划</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="番茄钟">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.svg">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .content-area {
+            padding: 20px;
+            padding-bottom: 0;
+            position: relative;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        
+        .header h1 {
+            font-size: 22px;
+            color: var(--color-deep-purple-gray);
+        }
+        
+        .header-btn {
+            background: var(--color-wisteria);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 8px 16px;
+            font-family: var(--font-family-display);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        
+        
+        .task-card {
+            background: var(--color-cream-yellow);
+            border-radius: 24px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .task-checkbox {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--color-wisteria);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .task-checkbox.checked {
+            background: var(--color-mint-green);
+            border-color: var(--color-mint-green);
+        }
+        
+        .task-content {
+            flex: 1;
+        }
+        
+        .task-title {
+            font-size: 16px;
+            color: var(--color-deep-purple-gray);
+            margin-bottom: 8px;
+        }
+        
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .tomato-count {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .tomato-count button {
+            width: 24px;
+            height: 24px;
+            background: var(--color-warm-pink);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+        }
+        
+        .paw-rating {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .paw-icon {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .paw-icon.filled {
+            opacity: 1;
+        }
+        
+        .paw-icon.empty {
+            opacity: 0.3;
+        }
+        
+        .brain-dump {
+            background: var(--color-light-purple);
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 20px;
+            position: relative;
+        }
+        
+        .brain-dump-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .brain-dump-header h3 {
+            font-size: 18px;
+            color: var(--color-deep-purple-gray);
+        }
+        
+        .butterfly-icon {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .brain-dump textarea {
+            width: 100%;
+            min-height: 80px;
+            background: rgba(255,255,255,0.6);
+            border: none;
+            border-radius: 16px;
+            padding: 12px;
+            font-family: var(--font-family-display);
+            font-size: 14px;
+            color: var(--color-warm-gray);
+            resize: none;
+            outline: none;
+        }
+        
+        .brain-dump textarea::placeholder {
+            color: var(--color-warm-gray);
+            opacity: 0.6;
+        }
+        
+        .plan-b-card {
+            background: var(--color-cream-yellow);
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .plan-b-card:active {
+            transform: scale(0.98);
+        }
+        
+        .dog-sign {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .plan-b-content h3 {
+            font-size: 16px;
+            color: var(--color-deep-purple-gray);
+            margin-bottom: 4px;
+        }
+        
+        .plan-b-content p {
+            font-size: 12px;
+            color: var(--color-warm-gray);
+        }
+        
+        .add-task-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 200;
+        }
+        
+        .add-task-modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--color-cream-white);
+            border-radius: 28px 28px 0 0;
+            padding: 30px;
+            width: 393px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content h3 {
+            font-size: 20px;
+            color: var(--color-deep-purple-gray);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            font-size: 14px;
+            color: var(--color-warm-gray);
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            background: var(--color-cream-yellow);
+            border: 2px solid var(--color-light-purple);
+            border-radius: 16px;
+            padding: 12px;
+            font-family: var(--font-family-display);
+            font-size: 14px;
+            color: var(--color-deep-purple-gray);
+            outline: none;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--color-wisteria);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+        
+        .form-actions button {
+            flex: 1;
+            padding: 14px;
+            border-radius: 20px;
+            font-family: var(--font-family-display);
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .btn-cancel {
+            background: var(--color-light-purple);
+            color: var(--color-warm-gray);
+        }
+        
+        .btn-submit {
+            background: var(--color-wisteria);
+            color: white;
+        }
+        
+        .scrollable-content {
+            min-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="iphone-status-bar">
+            <span>9:41</span>
+            <div style="display: flex; gap: 6px;">
+                <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor">
+                    <path d="M1 2H4C5.1 2 6 2.9 6 4V8C6 9.1 5.1 10 4 10H1V2Z" fill="currentColor"/>
+                    <path d="M8 1H17C17.55 1 18 1.45 18 2V10C18 10.55 17.55 11 17 11H8V1Z" fill="currentColor"/>
+                </svg>
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+                    <path d="M16 8H14V6C14 4.9 13.1 4 12 4H6C4.9 4 4 4.9 4 6V12C4 13.1 4.9 14 6 14H12C13.1 14 14 13.1 14 12V10H16V8Z" fill="currentColor"/>
+                </svg>
+                <svg width="24" height="14" viewBox="0 0 24 14" fill="currentColor">
+                    <path d="M22 1H2C0.9 1 0 1.9 0 3V11C0 12.1 0.9 13 2 13H22C23.1 13 24 12.1 24 11V3C24 1.9 23.1 1 22 1Z" fill="currentColor"/>
+                    <path d="M4 5H20V9H4V5Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="header">
+                <h1>今日任务</h1>
+                <button class="header-btn" onclick="openAddTaskModal()">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="white">
+                        <line x1="9" y1="1" x2="9" y2="17" stroke="white" stroke-width="2"/>
+                        <line x1="1" y1="9" x2="17" y2="9" stroke="white" stroke-width="2"/>
+                    </svg>
+                    添加任务
+                </button>
+            </div>
+            
+            <div class="scrollable-content">
+                <div class="brain-dump">
+                    <div class="brain-dump-header">
+                        <h3>想法倾泻区</h3>
+                        <svg class="butterfly-icon" viewBox="0 0 70 70" fill="none">
+                            <defs>
+                                <radialGradient id="wingUpperL" cx="0.7" cy="0.6" r="0.6">
+                                    <stop offset="0%" stop-color="#FFC8B0"/>
+                                    <stop offset="55%" stop-color="#FF8868"/>
+                                    <stop offset="100%" stop-color="#D8503C"/>
+                                </radialGradient>
+                                <radialGradient id="wingUpperR" cx="0.3" cy="0.6" r="0.6">
+                                    <stop offset="0%" stop-color="#FFC8B0"/>
+                                    <stop offset="55%" stop-color="#FF8868"/>
+                                    <stop offset="100%" stop-color="#D8503C"/>
+                                </radialGradient>
+                                <radialGradient id="wingLowerL" cx="0.7" cy="0.3" r="0.7">
+                                    <stop offset="0%" stop-color="#FFEE88"/>
+                                    <stop offset="55%" stop-color="#FFD838"/>
+                                    <stop offset="100%" stop-color="#D89800"/>
+                                </radialGradient>
+                                <radialGradient id="wingLowerR" cx="0.3" cy="0.3" r="0.7">
+                                    <stop offset="0%" stop-color="#FFEE88"/>
+                                    <stop offset="55%" stop-color="#FFD838"/>
+                                    <stop offset="100%" stop-color="#D89800"/>
+                                </radialGradient>
+                            </defs>
+                            <path d="M33 18 C20 6, 6 8, 4 20 C2 30, 10 38, 20 36 C28 34, 32 26, 33 18 Z" fill="url(#wingUpperL)" stroke="#A83828" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M37 18 C50 6, 64 8, 66 20 C68 30, 60 38, 50 36 C42 34, 38 26, 37 18 Z" fill="url(#wingUpperR)" stroke="#A83828" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M33 32 C22 38, 14 52, 20 60 C26 64, 32 58, 33 48 C33.5 40, 33.5 34, 33 32 Z" fill="url(#wingLowerL)" stroke="#A87800" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M37 32 C48 38, 56 52, 50 60 C44 64, 38 58, 37 48 C36.5 40, 36.5 34, 37 32 Z" fill="url(#wingLowerR)" stroke="#A87800" stroke-width="2" stroke-linejoin="round"/>
+                            <circle cx="14" cy="22" r="6" fill="#2D2334"/>
+                            <circle cx="14" cy="22" r="4" fill="#FFD838"/>
+                            <circle cx="13" cy="21" r="2" fill="#FFFFFF"/>
+                            <circle cx="56" cy="22" r="6" fill="#2D2334"/>
+                            <circle cx="56" cy="22" r="4" fill="#FFD838"/>
+                            <circle cx="55" cy="21" r="2" fill="#FFFFFF"/>
+                            <circle cx="22" cy="32" r="2.5" fill="#FFE8E0" opacity="0.85"/>
+                            <circle cx="48" cy="32" r="2.5" fill="#FFE8E0" opacity="0.85"/>
+                            <circle cx="24" cy="52" r="2" fill="#FF8868" opacity="0.8"/>
+                            <circle cx="46" cy="52" r="2" fill="#FF8868" opacity="0.8"/>
+                            <path d="M8 25 Q12 30 16 28" stroke="#A83828" stroke-width="1" fill="none" opacity="0.6"/>
+                            <path d="M62 25 Q58 30 54 28" stroke="#A83828" stroke-width="1" fill="none" opacity="0.6"/>
+                            <path d="M24 54 Q26 56 28 52" stroke="#A87800" stroke-width="1" fill="none" opacity="0.6"/>
+                            <path d="M46 54 Q44 56 42 52" stroke="#A87800" stroke-width="1" fill="none" opacity="0.6"/>
+                            <ellipse cx="35" cy="14" rx="4" ry="4.5" fill="#5A3D2A" stroke="#2D2334" stroke-width="1.2"/>
+                            <ellipse cx="35" cy="24" rx="3.8" ry="6" fill="#3D2A1F" stroke="#2D2334" stroke-width="1.2"/>
+                            <ellipse cx="35" cy="40" rx="3.2" ry="9" fill="#5A3D2A" stroke="#2D2334" stroke-width="1.2"/>
+                            <line x1="32" y1="36" x2="38" y2="36" stroke="#2D2334" stroke-width="0.8" opacity="0.6"/>
+                            <line x1="32" y1="42" x2="38" y2="42" stroke="#2D2334" stroke-width="0.8" opacity="0.6"/>
+                            <line x1="32.5" y1="46" x2="37.5" y2="46" stroke="#2D2334" stroke-width="0.8" opacity="0.6"/>
+                            <ellipse cx="33.5" cy="14" rx="1.2" ry="1.5" fill="#A87858" opacity="0.7"/>
+                            <ellipse cx="33.5" cy="24" rx="1.2" ry="2.5" fill="#8B5A3C" opacity="0.6"/>
+                            <ellipse cx="33.5" cy="40" rx="1" ry="3" fill="#8B5A3C" opacity="0.6"/>
+                            <ellipse cx="33" cy="14" rx="1.8" ry="2" fill="white"/>
+                            <ellipse cx="37" cy="14" rx="1.8" ry="2" fill="white"/>
+                            <ellipse cx="33.3" cy="14.3" rx="1.1" ry="1.2" fill="#2D2334"/>
+                            <ellipse cx="36.7" cy="14.3" rx="1.1" ry="1.2" fill="#2D2334"/>
+                            <circle cx="33.7" cy="13.7" r="0.5" fill="white"/>
+                            <circle cx="37.1" cy="13.7" r="0.5" fill="white"/>
+                            <!-- 双高光 - 第二高光 -->
+                            <circle cx="33" cy="14.8" r="0.35" fill="white" opacity="0.8"/>
+                            <circle cx="36.4" cy="14.8" r="0.35" fill="white" opacity="0.8"/>
+                            <path d="M31.5 12.5 L30.5 11.8" stroke="#2D2334" stroke-width="0.6" stroke-linecap="round"/>
+                            <path d="M38.5 12.5 L39.5 11.8" stroke="#2D2334" stroke-width="0.6" stroke-linecap="round"/>
+                            <ellipse cx="30.5" cy="16" rx="1.3" ry="0.9" fill="#FFB0C8" opacity="0.7"/>
+                            <ellipse cx="39.5" cy="16" rx="1.3" ry="0.9" fill="#FFB0C8" opacity="0.7"/>
+                            <g transform="translate(28.5,9) scale(0.4)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700"/></g>
+                            <g transform="translate(38,9) scale(0.4)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700"/></g>
+                            <path d="M34 17 Q35 18 36 17" stroke="#2D2334" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+                            <path d="M33 10 Q28 4 24 5" stroke="#2D2334" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                            <path d="M37 10 Q42 4 46 5" stroke="#2D2334" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                            <circle cx="24" cy="5" r="2.5" fill="#FFE0D0" stroke="#2D2334" stroke-width="0.8"/>
+                            <circle cx="46" cy="5" r="2.5" fill="#FFE0D0" stroke="#2D2334" stroke-width="0.8"/>
+                            <circle cx="23.5" cy="4.5" r="0.8" fill="white"/>
+                            <circle cx="45.5" cy="4.5" r="0.8" fill="white"/>
+                        </svg>
+                    </div>
+                    <textarea placeholder="把脑袋里蹦来蹦去的想法都写下来吧~" oninput="saveBrainDump()"></textarea>
+                </div>
+                
+                <div class="plan-b-card" onclick="openPlanBModal()">
+                    <div class="dog-sign">
+                        <svg viewBox="0 0 50 55" fill="none">
+                            <ellipse cx="25" cy="30" rx="18" ry="15" fill="#F0C878" stroke="#A06818" stroke-width="2.5"/>
+                            <ellipse cx="25" cy="34" rx="12" ry="7" fill="#FFF0D8"/>
+                            <!-- 脸颊两侧阴影 -->
+                            <ellipse cx="10" cy="30" rx="2" ry="5" fill="#D09838" opacity="0.2"/>
+                            <ellipse cx="40" cy="30" rx="2" ry="5" fill="#D09838" opacity="0.2"/>
+                            <ellipse cx="12" cy="17" rx="11" ry="14" fill="#FFE8C8" stroke="#A06818" stroke-width="2.5"/>
+                            <ellipse cx="38" cy="17" rx="11" ry="14" fill="#FFE8C8" stroke="#A06818" stroke-width="2.5"/>
+                            <ellipse cx="12" cy="19" rx="7" ry="9" fill="#E5B860" stroke="#B87828" stroke-width="2"/>
+                            <ellipse cx="38" cy="19" rx="7" ry="9" fill="#E5B860" stroke="#B87828" stroke-width="2"/>
+                            <!-- 耳内高光 -->
+                            <ellipse cx="11" cy="17" rx="2.5" ry="3.5" fill="#FFD8A0" opacity="0.5"/>
+                            <ellipse cx="39" cy="17" rx="2.5" ry="3.5" fill="#FFD8A0" opacity="0.5"/>
+                            <ellipse cx="18" cy="28" rx="8" ry="6.5" fill="#FFD0D3" stroke="#2D2334" stroke-width="1.2"/>
+                            <ellipse cx="32" cy="28" rx="8" ry="6.5" fill="#FFD0D3" stroke="#2D2334" stroke-width="1.2"/>
+                            <ellipse cx="18" cy="28" rx="5.5" fill="#2D2334"/>
+                            <ellipse cx="32" cy="28" rx="5.5" fill="#2D2334"/>
+                            <!-- 睫毛 -->
+                            <path d="M14 23.5 L12.5 22" stroke="#2D2334" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                            <path d="M14.5 23 L13 21.5" stroke="#2D2334" stroke-width="1" fill="none" stroke-linecap="round"/>
+                            <path d="M16.5 22.5 L16 20.8" stroke="#2D2334" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                            <path d="M17 22 L16.5 20.5" stroke="#2D2334" stroke-width="1" fill="none" stroke-linecap="round"/>
+                            <path d="M19.5 23 L20.3 21.2" stroke="#2D2334" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                            <path d="M20 22.5 L21 21" stroke="#2D2334" stroke-width="1" fill="none" stroke-linecap="round"/>
+                            <path d="M36 23.5 L37.5 22" stroke="#2D2334" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                            <path d="M35.5 23 L37 21.5" stroke="#2D2334" stroke-width="1" fill="none" stroke-linecap="round"/>
+                            <path d="M33.5 22.5 L34 20.8" stroke="#2D2334" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                            <path d="M33 22 L33.5 20.5" stroke="#2D2334" stroke-width="1" fill="none" stroke-linecap="round"/>
+                            <path d="M30.5 23 L29.7 21.2" stroke="#2D2334" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                            <path d="M30 22.5 L29 21" stroke="#2D2334" stroke-width="1" fill="none" stroke-linecap="round"/>
+                            <circle cx="16" cy="25" r="2.8" fill="white"/>
+                            <circle cx="30" cy="25" r="2.8" fill="white"/>
+                            <circle cx="19.5" cy="30" r="1.3" fill="white"/>
+                            <circle cx="33.5" cy="30" r="1.3" fill="white"/>
+                            <!-- 爱心高光 -->
+                            <path d="M14.5 23 C14 22 12.8 22.5 13 23.8 L13.5 24.5 L14 23.8 C14.8 23.2 14.2 22.3 14.5 23 Z" fill="white" opacity="0.9"/>
+                            <path d="M28.5 23 C28 22 26.8 22.5 27 23.8 L27.5 24.5 L28 23.8 C28.8 23.2 28.2 22.3 28.5 23 Z" fill="white" opacity="0.9"/>
+                            <g transform="translate(12,23) scale(0.55)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700"/></g>
+                            <g transform="translate(26,23) scale(0.55)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700"/></g>
+                            <!-- 额间大星星 -->
+                            <path d="M25 21 L25.5 22.5 L27 23 L25.5 23.5 L25 25 L24.5 23.5 L23 23 L24.5 22.5 Z" fill="#FFD700"/>
+                            <!-- 星星装饰 -->
+                            <g transform="translate(5,26) scale(0.4)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700"/></g>
+                            <g transform="translate(45,26) scale(0.4)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700"/></g>
+                            <ellipse cx="25" cy="34" rx="5.5" ry="3.5" fill="#FF8A8E"/>
+                            <circle cx="25" cy="33" r="1.8" fill="#FFCCCC"/>
+                            <path d="M21 38 Q25 42 29 38" stroke="#2D2334" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                            <circle cx="12" cy="32" r="4.5" fill="#FFD0B8" opacity="0.7"/>
+                            <circle cx="38" cy="32" r="4.5" fill="#FFD0B8" opacity="0.7"/>
+                            <!-- 腮红高光 -->
+                            <ellipse cx="11.5" cy="31" rx="1.8" ry="1" fill="white" opacity="0.45"/>
+                            <ellipse cx="37.5" cy="31" rx="1.8" ry="1" fill="white" opacity="0.45"/>
+                            <rect x="12" y="45" width="26" height="9" rx="4" fill="#FF6B6B" stroke="#D84040" stroke-width="1.5"/>
+                            <text x="25" y="52" text-anchor="middle" fill="white" font-size="8" font-weight="bold">如果...那么</text>
+                        </svg>
+                    </div>
+                    <div class="plan-b-content">
+                        <h3>如果-那么计划</h3>
+                        <p id="planb-display">准备好应对突发状况了吗？</p>
+                    </div>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="#5A4E6B">
+                        <path d="M8 5L12 10L8 15" stroke="#5A4E6B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-bar">
+            <div class="nav-item" onclick="openPage('home.html')">
+                <svg viewBox="0 0 48 48" fill="currentColor">
+                    <circle cx="24" cy="24" r="20" fill="none" stroke="#E8D5F5" stroke-width="3"/>
+                    <circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="4" stroke-dasharray="113" stroke-dashoffset="30" stroke-linecap="round"/>
+                    <circle cx="24" cy="24" r="2.5" fill="currentColor"/>
+                    <line x1="24" y1="24" x2="24" y2="10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="24" y1="24" x2="32" y2="24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+                <span>计时</span>
+            </div>
+            <div class="nav-item active">
+                <svg viewBox="0 0 48 48" fill="currentColor">
+                    <ellipse cx="20" cy="12" rx="4" ry="12" fill="#FFF3E0"/>
+                    <ellipse cx="28" cy="12" rx="4" ry="12" fill="#FFF3E0"/>
+                    <circle cx="24" cy="28" r="12" fill="#FFF3E0"/>
+                    <circle cx="20" cy="26" r="2.5" fill="currentColor"/>
+                    <circle cx="28" cy="26" r="2.5" fill="currentColor"/>
+                    <rect x="14" y="38" width="20" height="8" rx="2" fill="#C9A7EB"/>
+                    <line x1="16" y1="42" x2="32" y2="42" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <span>任务</span>
+            </div>
+            <div class="nav-item" onclick="openPage('dashboard.html')">
+                <svg viewBox="0 0 48 48" fill="currentColor">
+                    <rect x="8" y="10" width="12" height="28" rx="2" fill="#E8D5F5"/>
+                    <rect x="20" y="18" width="12" height="20" rx="2" fill="#C9A7EB"/>
+                    <rect x="32" y="14" width="12" height="24" rx="2" fill="#FFB3BA"/>
+                </svg>
+                <span>数据</span>
+            </div>
+            <div class="nav-item" onclick="openPage('settings.html')">
+                <svg viewBox="0 0 48 48" fill="currentColor">
+                    <circle cx="24" cy="24" r="6" fill="#C9A7EB"/>
+                    <circle cx="24" cy="24" r="16" fill="none" stroke="currentColor" stroke-width="4"/>
+                    <circle cx="24" cy="8" r="3" fill="currentColor"/>
+                    <circle cx="40" cy="24" r="3" fill="currentColor"/>
+                    <circle cx="24" cy="40" r="3" fill="currentColor"/>
+                    <circle cx="8" cy="24" r="3" fill="currentColor"/>
+                </svg>
+                <span>设置</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="planb-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: flex-end; z-index: 200;">
+        <div style="background: var(--color-cream-white); border-radius: 28px 28px 0 0; padding: 30px; width: 393px; max-height: 80vh; overflow-y: auto;">
+            <h3 style="font-size: 20px; color: var(--color-deep-purple-gray); margin-bottom: 20px; text-align: center;">如果-那么计划</h3>
+            
+            <div style="margin-bottom: 20px;">
+                <p style="font-size: 14px; color: var(--color-warm-gray); margin-bottom: 16px;">
+                    如果遇到什么干扰，你打算怎么办呢？写下来能提高完成率哦~ 🐾
+                </p>
+                <div class="form-group">
+                    <label>当...发生时</label>
+                    <input type="text" id="if-condition" placeholder="例如：当我忍不住想刷手机时">
+                </div>
+                <div class="form-group">
+                    <label>那么我就...</label>
+                    <input type="text" id="then-action" placeholder="例如：立刻做三个深呼吸">
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn-cancel" onclick="closePlanBModal()">关闭</button>
+                <button class="btn-submit" onclick="savePlanB()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="add-task-modal" id="add-task-modal">
+        <div class="modal-content">
+            <h3>添加新任务</h3>
+            
+            <div class="form-group">
+                <label>任务名称</label>
+                <input type="text" id="task-name" placeholder="输入任务名称">
+            </div>
+            
+            <div class="form-group">
+                <label>任务描述</label>
+                <textarea id="task-desc" placeholder="描述一下这个任务"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>番茄数量</label>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <button onclick="adjustTomatoInput(-1)" class="btn-secondary">-</button>
+                    <span id="tomato-input-value" style="font-size: 20px; color: var(--color-deep-purple-gray);">1</span>
+                    <button onclick="adjustTomatoInput(1)" class="btn-secondary">+</button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>承诺度</label>
+                <div class="paw-rating" style="gap: 8px;">
+                    <svg class="paw-icon empty" onclick="setPawRating(this, 1)" viewBox="0 0 24 24" style="width: 32px; height: 32px; cursor: pointer;">
+                        <circle cx="12" cy="12" r="6" fill="#C9A7EB"/>
+                        <circle cx="6" cy="8" r="3" fill="#C9A7EB"/>
+                        <circle cx="18" cy="8" r="3" fill="#C9A7EB"/>
+                        <circle cx="6" cy="16" r="3" fill="#C9A7EB"/>
+                        <circle cx="18" cy="16" r="3" fill="#C9A7EB"/>
+                    </svg>
+                    <svg class="paw-icon empty" onclick="setPawRating(this, 2)" viewBox="0 0 24 24" style="width: 32px; height: 32px; cursor: pointer;">
+                        <circle cx="12" cy="12" r="6" fill="#C9A7EB"/>
+                        <circle cx="6" cy="8" r="3" fill="#C9A7EB"/>
+                        <circle cx="18" cy="8" r="3" fill="#C9A7EB"/>
+                        <circle cx="6" cy="16" r="3" fill="#C9A7EB"/>
+                        <circle cx="18" cy="16" r="3" fill="#C9A7EB"/>
+                    </svg>
+                    <svg class="paw-icon empty" onclick="setPawRating(this, 3)" viewBox="0 0 24 24" style="width: 32px; height: 32px; cursor: pointer;">
+                        <circle cx="12" cy="12" r="6" fill="#C9A7EB"/>
+                        <circle cx="6" cy="8" r="3" fill="#C9A7EB"/>
+                        <circle cx="18" cy="8" r="3" fill="#C9A7EB"/>
+                        <circle cx="6" cy="16" r="3" fill="#C9A7EB"/>
+                        <circle cx="18" cy="16" r="3" fill="#C9A7EB"/>
+                    </svg>
+                    <svg class="paw-icon empty" onclick="setPawRating(this, 4)" viewBox="0 0 24 24" style="width: 32px; height: 32px; cursor: pointer;">
+                        <circle cx="12" cy="12" r="6" fill="#C9A7EB"/>
+                        <circle cx="6" cy="8" r="3" fill="#C9A7EB"/>
+                        <circle cx="18" cy="8" r="3" fill="#C9A7EB"/>
+                        <circle cx="6" cy="16" r="3" fill="#C9A7EB"/>
+                        <circle cx="18" cy="16" r="3" fill="#C9A7EB"/>
+                    </svg>
+                    <svg class="paw-icon empty" onclick="setPawRating(this, 5)" viewBox="0 0 24 24" style="width: 32px; height: 32px; cursor: pointer;">
+                        <circle cx="12" cy="12" r="6" fill="#C9A7EB"/>
+                        <circle cx="6" cy="8" r="3" fill="#C9A7EB"/>
+                        <circle cx="18" cy="8" r="3" fill="#C9A7EB"/>
+                        <circle cx="6" cy="16" r="3" fill="#C9A7EB"/>
+                        <circle cx="18" cy="16" r="3" fill="#C9A7EB"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn-cancel" onclick="closeAddTaskModal()">取消</button>
+                <button class="btn-submit" onclick="submitTask()">添加任务</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/common.js"></script>
+    <script>
+        let tomatoValue = 1;
+        let tasks = [];
+        let pawRating = 3;
+        
+        function loadTasks() {
+            const saved = localStorage.getItem('pomodoro_tasks');
+            tasks = saved ? JSON.parse(saved) : getDefaultTasks();
+            renderTasks();
+            
+            const savedDump = localStorage.getItem('pomodoro_brain_dump');
+            if (savedDump) {
+                document.querySelector('.brain-dump textarea').value = savedDump;
+            }
+            
+            updatePlanBDisplay();
+        }
+        
+        function getDefaultTasks() {
+            return [
+                { id: '1', title: '完成项目设计稿', tomatoes: 3, commitment: 3, completed: false, createdAt: Date.now() },
+                { id: '2', title: '整理会议记录', tomatoes: 1, commitment: 2, completed: true, createdAt: Date.now() },
+                { id: '3', title: '学习新框架', tomatoes: 2, commitment: 4, completed: false, createdAt: Date.now() }
+            ];
+        }
+        
+        function saveTasks() {
+            localStorage.setItem('pomodoro_tasks', JSON.stringify(tasks));
+        }
+        
+        function renderTasks() {
+            const container = document.querySelector('.scrollable-content');
+            const existingCards = container.querySelectorAll('.task-card');
+            existingCards.forEach(card => card.remove());
+            
+            tasks.forEach((task, index) => {
+                const card = createTaskCard(task, index);
+                const brainDump = container.querySelector('.brain-dump');
+                container.insertBefore(card, brainDump);
+            });
+        }
+        
+        function createTaskCard(task, index) {
+            const card = document.createElement('div');
+            card.className = 'task-card';
+            
+            const checkedClass = task.completed ? ' checked' : '';
+            const checkDisplay = task.completed ? 'block' : 'none';
+            const titleStyle = task.completed ? 'text-decoration: line-through; color: var(--color-warm-gray);' : '';
+            
+            card.innerHTML = `
+                <div class="task-checkbox${checkedClass}" onclick="toggleTaskByIndex(${index})">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="#3D334A" style="display: ${checkDisplay};">
+                        <path d="M3 7L6 10L13 4" stroke="#3D334A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="task-content">
+                    <div class="task-title" style="${titleStyle}">${task.title}</div>
+                    <div class="task-meta">
+                        <div class="tomato-count">
+                            <button onclick="changeTomato(event, ${index}, -1)">-</button>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="#FF6B6B">
+                                <circle cx="10" cy="11" r="6" fill="#FF6B6B"/>
+                                <path d="M10 5L9 2L11 2Z" fill="#B5EAD7"/>
+                            </svg>
+                            <span style="font-size: 12px; color: var(--color-warm-gray);">${task.tomatoes}</span>
+                            <button onclick="changeTomato(event, ${index}, 1)">+</button>
+                        </div>
+                        <div class="paw-rating">
+                            ${generatePawIcons(task.commitment)}
+                        </div>
+                    </div>
+                </div>
+                <button onclick="deleteTask(event, ${index})" style="background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;opacity:0.5;transition:opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.5'">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="#FF6B6B">
+                        <line x1="4" y1="4" x2="14" y2="14" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="14" y1="4" x2="4" y2="14" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            `;
+            return card;
+        }
+        
+        function generatePawIcons(count) {
+            let html = '';
+            for (let i = 0; i < 5; i++) {
+                const filled = i < count ? 'filled' : 'empty';
+                html += `<svg class="paw-icon ${filled}" viewBox="0 0 16 16">
+                    <circle cx="8" cy="8" r="4" fill="#C9A7EB"/>
+                    <circle cx="4" cy="6" r="2" fill="#C9A7EB"/>
+                    <circle cx="12" cy="6" r="2" fill="#C9A7EB"/>
+                    <circle cx="4" cy="10" r="2" fill="#C9A7EB"/>
+                    <circle cx="12" cy="10" r="2" fill="#C9A7EB"/>
+                </svg>`;
+            }
+            return html;
+        }
+        
+        function toggleTaskByIndex(index) {
+            tasks[index].completed = !tasks[index].completed;
+            saveTasks();
+            renderTasks();
+        }
+        
+        function changeTomato(e, index, delta) {
+            e.stopPropagation();
+            const newCount = tasks[index].tomatoes + delta;
+            if (newCount >= 1 && newCount <= 10) {
+                tasks[index].tomatoes = newCount;
+                saveTasks();
+                renderTasks();
+            }
+        }
+        
+        function deleteTask(e, index) {
+            e.stopPropagation();
+            tasks.splice(index, 1);
+            saveTasks();
+            renderTasks();
+        }
+        
+        function openAddTaskModal() {
+            const savedRating = localStorage.getItem('pomodoro_paw_rating');
+            if (savedRating) {
+                pawRating = parseInt(savedRating);
+                const container = document.querySelector('#add-task-modal .paw-rating');
+                const paws = container.querySelectorAll('.paw-icon');
+                paws.forEach((paw, index) => {
+                    if (index < pawRating) {
+                        paw.classList.remove('empty');
+                        paw.classList.add('filled');
+                    } else {
+                        paw.classList.remove('filled');
+                        paw.classList.add('empty');
+                    }
+                });
+            }
+            document.getElementById('add-task-modal').classList.add('active');
+        }
+        
+        function closeAddTaskModal() {
+            document.getElementById('add-task-modal').classList.remove('active');
+        }
+        
+        function adjustTomatoInput(delta) {
+            tomatoValue = Math.max(1, Math.min(10, tomatoValue + delta));
+            document.getElementById('tomato-input-value').textContent = tomatoValue;
+        }
+        
+        function setPawRating(el, rating) {
+            pawRating = rating;
+            const container = el.parentElement;
+            const paws = container.querySelectorAll('.paw-icon');
+            
+            paws.forEach((paw, index) => {
+                if (index < rating) {
+                    paw.classList.remove('empty');
+                    paw.classList.add('filled');
+                } else {
+                    paw.classList.remove('filled');
+                    paw.classList.add('empty');
+                }
+            });
+            
+            localStorage.setItem('pomodoro_paw_rating', rating);
+        }
+        
+        function submitTask() {
+            const nameInput = document.getElementById('task-name');
+            const title = nameInput.value.trim();
+            if (!title) return;
+            
+            const newTask = {
+                id: Date.now().toString(),
+                title: title,
+                tomatoes: tomatoValue,
+                commitment: pawRating,
+                completed: false,
+                createdAt: Date.now()
+            };
+            
+            tasks.push(newTask);
+            saveTasks();
+            renderTasks();
+            
+            nameInput.value = '';
+            tomatoValue = 1;
+            document.getElementById('tomato-input-value').textContent = '1';
+            closeAddTaskModal();
+        }
+        
+        function openPlanBModal() {
+            document.getElementById('planb-modal').style.display = 'flex';
+            const saved = localStorage.getItem('pomodoro_planb');
+            if (saved) {
+                const planb = JSON.parse(saved);
+                document.getElementById('if-condition').value = planb.if || '';
+                document.getElementById('then-action').value = planb.then || '';
+            }
+        }
+        
+        function closePlanBModal() {
+            document.getElementById('planb-modal').style.display = 'none';
+        }
+        
+        function savePlanB() {
+            const ifCond = document.getElementById('if-condition').value.trim();
+            const thenAct = document.getElementById('then-action').value.trim();
+            if (ifCond && thenAct) {
+                localStorage.setItem('pomodoro_planb', JSON.stringify({ if: ifCond, then: thenAct }));
+                updatePlanBDisplay();
+            }
+            closePlanBModal();
+        }
+        
+        function updatePlanBDisplay() {
+            const saved = localStorage.getItem('pomodoro_planb');
+            const display = document.getElementById('planb-display');
+            if (saved) {
+                const planb = JSON.parse(saved);
+                display.innerHTML = '如果 ' + planb.if + '<br>那么 ' + planb.then;
+            } else {
+                display.textContent = '准备好应对突发状况了吗？';
+            }
+        }
+        
+        function openPage(page) {
+            window.location.href = page;
+        }
+        
+        function saveBrainDump() {
+            const textarea = document.querySelector('.brain-dump textarea');
+            localStorage.setItem('pomodoro_brain_dump', textarea.value);
+        }
+        
+        loadTasks();
+    </script>
+</body>
+</html>
