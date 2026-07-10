@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#FFF5F7"/>
+  <circle cx="256" cy="256" r="240" fill="url(#bg-grad)" opacity="0.15"/>
+  <defs>
+    <radialGradient id="bg-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C9A7EB"/>
+      <stop offset="100%" stop-color="#E8D5F5"/>
+    </radialGradient>
+    <radialGradient id="hamster-grad" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#F5A623"/>
+      <stop offset="100%" stop-color="#E8921A"/>
+    </radialGradient>
+  </defs>
+  <!-- 仓鼠身体 -->
+  <ellipse cx="256" cy="290" rx="110" ry="100" fill="url(#hamster-grad)" stroke="#C67A14" stroke-width="5"/>
+  <!-- 仓鼠肚子 -->
+  <ellipse cx="256" cy="310" rx="65" ry="55" fill="#FFF5E0" stroke="#C67A14" stroke-width="3"/>
+  <!-- 左耳 -->
+  <ellipse cx="190" cy="190" rx="38" ry="44" fill="#F5A623" stroke="#C67A14" stroke-width="5"/>
+  <ellipse cx="190" cy="190" rx="22" ry="28" fill="#FFD5A0"/>
+  <!-- 右耳 -->
+  <ellipse cx="322" cy="190" rx="38" ry="44" fill="#F5A623" stroke="#C67A14" stroke-width="5"/>
+  <ellipse cx="322" cy="190" rx="22" ry="28" fill="#FFD5A0"/>
+  <!-- 左眼 -->
+  <ellipse cx="220" cy="250" rx="16" ry="19" fill="#4A4A4A"/>
+  <ellipse cx="226" cy="244" rx="7" ry="7" fill="white"/>
+  <ellipse cx="218" cy="248" rx="3.5" ry="3.5" fill="white" opacity="0.7"/>
+  <!-- 右眼 -->
+  <ellipse cx="292" cy="250" rx="16" ry="19" fill="#4A4A4A"/>
+  <ellipse cx="298" cy="244" rx="7" ry="7" fill="white"/>
+  <ellipse cx="290" cy="248" rx="3.5" ry="3.5" fill="white" opacity="0.7"/>
+  <!-- 睫毛 -->
+  <path d="M204 235 L202 224 M216 232 L218 220 M230 234 L235 224" stroke="#4A4A4A" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M308 235 L310 224 M296 232 L294 220 M282 234 L277 224" stroke="#4A4A4A" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- 鼻子 -->
+  <ellipse cx="256" cy="272" rx="9" ry="6" fill="#FF8A9E"/>
+  <!-- 嘴巴 -->
+  <path d="M242 285 Q256 296 270 285" fill="none" stroke="#C67A14" stroke-width="4" stroke-linecap="round"/>
+  <!-- 腮红 -->
+  <ellipse cx="200" cy="275" rx="16" ry="10" fill="#FFB5C0" opacity="0.5"/>
+  <ellipse cx="312" cy="275" rx="16" ry="10" fill="#FFB5C0" opacity="0.5"/>
+  <!-- 金色星星 -->
+  <polygon points="256,205 260,218 274,218 263,226 267,240 256,232 245,240 249,226 238,218 252,218" fill="#FFD700" opacity="0.8"/>
+  <!-- 左爪 -->
+  <ellipse cx="168" cy="340" rx="22" ry="16" fill="#F5A623" stroke="#C67A14" stroke-width="4"/>
+  <ellipse cx="158" cy="344" rx="8" ry="6" fill="#FFD5A0"/>
+  <!-- 右爪 -->
+  <ellipse cx="344" cy="340" rx="22" ry="16" fill="#F5A623" stroke="#C67A14" stroke-width="4"/>
+  <ellipse cx="354" cy="344" rx="8" ry="6" fill="#FFD5A0"/>
+  <!-- 左脚 -->
+  <ellipse cx="210" cy="380" rx="22" ry="14" fill="#F5A623" stroke="#C67A14" stroke-width="4"/>
+  <ellipse cx="210" cy="384" rx="10" ry="8" fill="#FFD5A0"/>
+  <!-- 右脚 -->
+  <ellipse cx="302" cy="380" rx="22" ry="14" fill="#F5A623" stroke="#C67A14" stroke-width="4"/>
+  <ellipse cx="302" cy="384" rx="10" ry="8" fill="#FFD5A0"/>
+</svg>
