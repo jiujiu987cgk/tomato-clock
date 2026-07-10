@@ -53,6 +53,10 @@
     box-sizing: border-box;
 }
 
+html {
+    height: 100%;
+}
+
 body {
     font-family: var(--font-family-display);
     background-color: var(--bg-primary);
@@ -111,11 +115,13 @@ body::after {
     width: 100%;
     max-width: 393px;
     margin: 0 auto;
-    background: var(--page-bg, linear-gradient(180deg, #FFFBF7 0%, #FDF0FF 30%, #FFF0F5 60%, #FFFBF7 100%));
+    background: var(--page-bg, linear-gradient(180deg, #FFFBF7 0%, #FDF0FF 30%, #FFF0F0 60%, #FFFBF7 100%));
+    background-attachment: local;
     border-radius: 0;
     box-shadow: none;
     overflow-x: hidden;
     position: relative;
+    min-height: 100vh;
 }
 
 .page-container::before {
