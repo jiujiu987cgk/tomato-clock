@@ -1,0 +1,32 @@
+{
+  "name": "番茄钟陪伴",
+  "short_name": "番茄钟",
+  "description": "一只陪你专注的萌系番茄钟 - 陪伴式专注力管理工具",
+  "start_url": "home.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF5F7",
+  "theme_color": "#C9A7EB",
+  "scope": ".",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "lifestyle"],
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "screenshots": [],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "iarc_rating_id": ""
+}
