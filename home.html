@@ -1492,18 +1492,7 @@
             isRunning = true;
             // 显示暂停图标（两个竖条）
             const svg = document.querySelector('.btn-main svg');
-            // 清除所有子元素
-            while (svg.firstChild) svg.removeChild(svg.firstChild);
-            // 创建第一个竖条
-            const bar1 = document.createElement('polygon');
-            bar1.setAttribute('points', '16,12 16,36 21,36 21,12');
-            bar1.setAttribute('fill', 'white');
-            svg.appendChild(bar1);
-            // 创建第二个竖条
-            const bar2 = document.createElement('polygon');
-            bar2.setAttribute('points', '27,12 27,36 32,36 32,12');
-            bar2.setAttribute('fill', 'white');
-            svg.appendChild(bar2);
+            svg.innerHTML = '<rect x="16" y="12" width="5" height="24" rx="1" fill="white"/><rect x="27" y="12" width="5" height="24" rx="1" fill="white"/>';
             
             const hamster = document.querySelector('.hamster-container');
             hamster.classList.remove('idle');
@@ -1532,11 +1521,7 @@
             
             // 恢复为播放图标（三角形）
             const svg = document.querySelector('.btn-main svg');
-            while (svg.firstChild) svg.removeChild(svg.firstChild);
-            const playIcon = document.createElement('polygon');
-            playIcon.setAttribute('points', '16,10 38,24 16,38');
-            playIcon.setAttribute('fill', 'white');
-            svg.appendChild(playIcon);
+            svg.innerHTML = '<polygon points="16,10 38,24 16,38" fill="white"/>';
             
             const hamster = document.querySelector('.hamster-container');
             hamster.classList.remove('running');
