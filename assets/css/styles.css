@@ -110,7 +110,7 @@ body::after {
     width: 100%;
     max-width: 393px;
     margin: 0 auto;
-    background-color: var(--color-cream-white, #FFFBF7);
+    background-color: transparent;
     border-radius: 0;
     box-shadow: none;
     overflow-x: hidden;
