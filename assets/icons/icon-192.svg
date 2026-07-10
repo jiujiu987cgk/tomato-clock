@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="40" fill="#FFF5F7"/>
+  <!-- 紫色渐变背景圆 -->
+  <circle cx="96" cy="96" r="88" fill="url(#bg-grad)" opacity="0.15"/>
+  <defs>
+    <radialGradient id="bg-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C9A7EB"/>
+      <stop offset="100%" stop-color="#E8D5F5"/>
+    </radialGradient>
+    <radialGradient id="hamster-grad" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#F5A623"/>
+      <stop offset="100%" stop-color="#E8921A"/>
+    </radialGradient>
+  </defs>
+  <!-- 仓鼠身体 -->
+  <ellipse cx="96" cy="108" rx="40" ry="36" fill="url(#hamster-grad)" stroke="#C67A14" stroke-width="2.5"/>
+  <!-- 仓鼠肚子 -->
+  <ellipse cx="96" cy="116" rx="24" ry="20" fill="#FFF5E0" stroke="#C67A14" stroke-width="1.5"/>
+  <!-- 左耳 -->
+  <ellipse cx="70" cy="72" rx="14" ry="16" fill="#F5A623" stroke="#C67A14" stroke-width="2.5"/>
+  <ellipse cx="70" cy="72" rx="8" ry="10" fill="#FFD5A0"/>
+  <!-- 右耳 -->
+  <ellipse cx="122" cy="72" rx="14" ry="16" fill="#F5A623" stroke="#C67A14" stroke-width="2.5"/>
+  <ellipse cx="122" cy="72" rx="8" ry="10" fill="#FFD5A0"/>
+  <!-- 左眼 -->
+  <ellipse cx="82" cy="94" rx="6" ry="7" fill="#4A4A4A"/>
+  <ellipse cx="84" cy="92" rx="2.5" ry="2.5" fill="white"/>
+  <ellipse cx="81" cy="93.5" rx="1.2" ry="1.2" fill="white" opacity="0.7"/>
+  <!-- 右眼 -->
+  <ellipse cx="110" cy="94" rx="6" ry="7" fill="#4A4A4A"/>
+  <ellipse cx="112" cy="92" rx="2.5" ry="2.5" fill="white"/>
+  <ellipse cx="109" cy="93.5" rx="1.2" ry="1.2" fill="white" opacity="0.7"/>
+  <!-- 鼻子 -->
+  <ellipse cx="96" cy="102" rx="3.5" ry="2.5" fill="#FF8A9E"/>
+  <!-- 嘴巴 -->
+  <path d="M91 107 Q96 112 101 107" fill="none" stroke="#C67A14" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- 腮红 -->
+  <ellipse cx="74" cy="102" rx="6" ry="4" fill="#FFB5C0" opacity="0.5"/>
+  <ellipse cx="118" cy="102" rx="6" ry="4" fill="#FFB5C0" opacity="0.5"/>
+  <!-- 金色星星 -->
+  <polygon points="96,78 97.5,82.5 102,82.5 98.5,85.5 100,90 96,87 92,90 93.5,85.5 90,82.5 94.5,82.5" fill="#FFD700" opacity="0.8"/>
+  <!-- 左爪 -->
+  <ellipse cx="62" cy="126" rx="8" ry="6" fill="#F5A623" stroke="#C67A14" stroke-width="2"/>
+  <ellipse cx="56" cy="128" rx="3" ry="2.5" fill="#FFD5A0"/>
+  <!-- 右爪 -->
+  <ellipse cx="130" cy="126" rx="8" ry="6" fill="#F5A623" stroke="#C67A14" stroke-width="2"/>
+  <ellipse cx="136" cy="128" rx="3" ry="2.5" fill="#FFD5A0"/>
+  <!-- 左脚 -->
+  <ellipse cx="78" cy="142" rx="8" ry="5" fill="#F5A623" stroke="#C67A14" stroke-width="2"/>
+  <ellipse cx="78" cy="144" rx="4" ry="3" fill="#FFD5A0"/>
+  <!-- 右脚 -->
+  <ellipse cx="114" cy="142" rx="8" ry="5" fill="#F5A623" stroke="#C67A14" stroke-width="2"/>
+  <ellipse cx="114" cy="144" rx="4" ry="3" fill="#FFD5A0"/>
+</svg>
