@@ -59,16 +59,16 @@ body {
     color: var(--text-primary);
     overflow-x: hidden;
     background-image:
-        radial-gradient(ellipse at 5% 10%, var(--body-glow-1, rgba(255, 179, 186, 0.25)) 0%, transparent 50%),
-        radial-gradient(ellipse at 95% 5%, var(--body-glow-2, rgba(201, 167, 235, 0.22)) 0%, transparent 55%),
-        radial-gradient(ellipse at 50% 95%, var(--body-glow-3, rgba(232, 213, 245, 0.2)) 0%, transparent 60%),
-        radial-gradient(ellipse at 15% 80%, var(--body-glow-4, rgba(255, 211, 42, 0.15)) 0%, transparent 45%),
-        radial-gradient(ellipse at 85% 90%, var(--body-glow-5, rgba(181, 234, 215, 0.12)) 0%, transparent 50%),
-        radial-gradient(ellipse at 30% 50%, var(--body-glow-6, rgba(168, 216, 234, 0.1)) 0%, transparent 40%),
-        radial-gradient(ellipse at 70% 40%, var(--body-glow-7, rgba(206, 223, 159, 0.1)) 0%, transparent 45%);
+        radial-gradient(ellipse at 5% 5%, var(--body-glow-1, rgba(255, 179, 186, 0.25)) 0%, transparent 600px),
+        radial-gradient(ellipse at 95% 5%, var(--body-glow-2, rgba(201, 167, 235, 0.22)) 0%, transparent 600px),
+        radial-gradient(ellipse at 50% 30%, var(--body-glow-3, rgba(232, 213, 245, 0.2)) 0%, transparent 700px),
+        radial-gradient(ellipse at 15% 20%, var(--body-glow-4, rgba(255, 211, 42, 0.15)) 0%, transparent 500px),
+        radial-gradient(ellipse at 85% 25%, var(--body-glow-5, rgba(181, 234, 215, 0.12)) 0%, transparent 500px),
+        radial-gradient(ellipse at 30% 15%, var(--body-glow-6, rgba(168, 216, 234, 0.1)) 0%, transparent 500px),
+        radial-gradient(ellipse at 70% 12%, var(--body-glow-7, rgba(206, 223, 159, 0.1)) 0%, transparent 500px);
     background-repeat: no-repeat;
-    background-size: 100% 100vh;
-    background-attachment: fixed;
+    background-size: 100% 100%;
+    background-attachment: scroll;
     position: relative;
 }
 
