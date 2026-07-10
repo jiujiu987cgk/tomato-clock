@@ -1,0 +1,33 @@
+{
+    "host": "https://pretty-cycles-begin.loca.lt",
+    "webManifestUrl": "https://pretty-cycles-begin.loca.lt/manifest.json",
+    "appVersion": "1.0.0.0",
+    "appVersionCode": 1,
+    "backgroundColor": "#FFF5F7",
+    "display": "standalone",
+    "enableNotifications": false,
+    "enableSiteSettingsShortcut": true,
+    "fallbackType": "customtabs",
+    "features": {
+        "locationDelegation": { "enabled": false },
+        "playBilling": { "enabled": false }
+    },
+    "iconUrl": "https://pretty-cycles-begin.loca.lt/assets/icons/icon-512.svg",
+    "includeSourceCode": false,
+    "isChromeOSOnly": false,
+    "launcherName": "番茄钟",
+    "maskableIconUrl": "https://pretty-cycles-begin.loca.lt/assets/icons/icon-512.svg",
+    "name": "番茄钟陪伴",
+    "navigationColor": "#C9A7EB",
+    "navigationColorDark": "#1A1A2E",
+    "navigationDividerColor": "#C9A7EB",
+    "navigationDividerColorDark": "#1A1A2E",
+    "orientation": "portrait",
+    "packageId": "com.tomato.clock",
+    "signing": null,
+    "signingMode": "none",
+    "splashScreenFadeOutDuration": 300,
+    "startUrl": "/home.html",
+    "themeColor": "#C9A7EB",
+    "themeColorDark": "#1A1A2E"
+}
