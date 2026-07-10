@@ -134,6 +134,10 @@ body::after {
     flex-direction: column;
 }
 
+.scrollable-content {
+    flex: 1;
+}
+
 .page-container::before {
     content: '';
     position: absolute;
