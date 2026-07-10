@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pomodoro-cache-v6';
+const CACHE_NAME = 'pomodoro-cache-v7';
 const ASSETS_TO_CACHE = [
   'home.html',
   'task-plan.html',
