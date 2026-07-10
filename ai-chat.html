@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI对话</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="番茄钟">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.svg">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .content-area {
+            padding: 0;
+            padding-bottom: 230px;
+            height: calc(100vh - 54px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, var(--color-wisteria) 0%, #B895D6 50%, #A880C6 100%);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 16px rgba(201, 167, 235, 0.35);
+            position: relative;
+        }
+        
+        .chat-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(180deg, rgba(201,167,235,0.25) 0%, transparent 100%);
+        }
+        
+        .header-back {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.25);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        
+        .header-back:hover {
+            background: rgba(255,255,255,0.4);
+        }
+        
+        .deer-avatar-lg {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            padding: 2px;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.4), 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .header-info {
+            flex: 1;
+        }
+        
+        .header-info h2 {
+            font-size: 17px;
+            color: white;
+            margin-bottom: 2px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        
+        .online-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--color-mint-green);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+            box-shadow: 0 0 6px rgba(181, 234, 215, 0.8);
+        }
+        
+        .online-status span {
+            font-size: 11px;
+            color: rgba(255,255,255,0.85);
+        }
+        
+        .clear-btn {
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(4px);
+            border: none;
+            border-radius: 12px;
+            padding: 6px 12px;
+            color: white;
+            font-family: var(--font-family-display);
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .clear-btn:hover {
+            background: rgba(255,255,255,0.4);
+        }
+        
+        .emotion-bar {
+            background: linear-gradient(180deg, #FFFFFF 0%, var(--color-cream-white) 100%);
+            padding: 12px 16px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            border-bottom: 1px solid rgba(232, 213, 245, 0.6);
+            box-shadow: 0 2px 8px rgba(201, 167, 235, 0.06);
+        }
+        
+        .emotion-bar::-webkit-scrollbar { height: 0; }
+        
+        .emotion-tag {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, var(--color-cream-yellow) 0%, #FFE8F5 100%);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.25s;
+            flex-shrink: 0;
+            border: 1.5px solid transparent;
+            min-width: 56px;
+        }
+        
+        .emotion-tag:hover {
+            background: linear-gradient(135deg, var(--color-light-purple) 0%, #FFE8F5 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(201, 167, 235, 0.2);
+        }
+        
+        .emotion-tag.active {
+            background: linear-gradient(135deg, var(--color-wisteria) 0%, #B895D6 100%);
+            box-shadow: 0 4px 12px rgba(201, 167, 235, 0.45);
+            border-color: rgba(255,255,255,0.6);
+        }
+        
+        .emotion-tag.active span {
+            color: white;
+        }
+        
+        .emotion-icon {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .emotion-tag span {
+            font-size: 11px;
+            color: var(--color-warm-gray);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 16px;
+            background: linear-gradient(180deg, var(--color-cream-white) 0%, #FFF5F8 100%);
+            scroll-behavior: smooth;
+        }
+        
+        .message {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            animation: msg-in 0.35s ease-out;
+        }
+        
+        @keyframes msg-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.6);
+            box-shadow: 0 2px 6px rgba(201, 167, 235, 0.15);
+        }
+        
+        .message-bubble {
+            max-width: 75%;
+            padding: 11px 15px;
+            border-radius: 18px;
+            position: relative;
+        }
+        
+        .message-bubble.ai {
+            background: linear-gradient(135deg, var(--color-light-purple) 0%, var(--color-light-purple) 100%);
+            border-radius: 18px 18px 18px 4px;
+            box-shadow: 0 3px 10px rgba(201, 167, 235, 0.2);
+        }
+        
+        .message-bubble.user {
+            background: linear-gradient(135deg, #FF8888 0%, var(--color-berry-red) 100%);
+            color: white;
+            border-radius: 18px 18px 4px 18px;
+            box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        .message-text {
+            font-size: 14px;
+            line-height: 1.55;
+        }
+        
+        .message-text.user {
+            color: white;
+        }
+        
+        .system-message {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        
+        .system-content {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(255, 243, 224, 0.95) 0%, rgba(232, 213, 245, 0.4) 100%);
+            padding: 10px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(201, 167, 235, 0.2);
+            box-shadow: 0 2px 8px rgba(201, 167, 235, 0.1);
+        }
+        
+        .system-deer {
+            width: 36px;
+            height: 36px;
+        }
+        
+        .system-content p {
+            font-size: 11px;
+            color: var(--color-warm-gray);
+            margin: 0;
+        }
+        
+        .quick-commands {
+            position: fixed;
+            bottom: 152px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 393px;
+            padding: 10px 12px 12px;
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+            background: rgba(255, 251, 247, 0.96);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(232, 213, 245, 0.4);
+            box-shadow: 0 -4px 16px rgba(201, 167, 235, 0.08);
+            z-index: 90;
+        }
+        
+        .quick-commands::-webkit-scrollbar { height: 0; }
+        
+        .quick-btn {
+            flex: 1;
+            background: linear-gradient(135deg, #FFFFFF 0%, var(--color-cream-yellow) 100%);
+            border: 1.5px solid rgba(201, 167, 235, 0.4);
+            border-radius: 16px;
+            padding: 10px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(201, 167, 235, 0.1);
+            min-width: 0;
+        }
+        
+        .quick-btn:hover {
+            background: linear-gradient(135deg, var(--color-cream-yellow) 0%, #FFE8F5 100%);
+            border-color: var(--color-wisteria);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(201, 167, 235, 0.25);
+        }
+        
+        .quick-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .quick-icon {
+            width: 30px;
+            height: 30px;
+        }
+        
+        .quick-btn span {
+            font-size: 11px;
+            color: var(--color-deep-purple-gray);
+        }
+        
+        .input-area {
+            position: fixed;
+            bottom: 83px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 393px;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(232, 213, 245, 0.6);
+            box-shadow: 0 -4px 16px rgba(201, 167, 235, 0.1);
+        }
+        
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, var(--color-cream-yellow) 0%, #FFE8F5 100%);
+            border: 1.5px solid rgba(232, 213, 245, 0.7);
+            border-radius: 30px;
+            padding: 7px 8px 7px 14px;
+            transition: all 0.3s;
+            box-shadow: inset 0 1px 3px rgba(255,255,255,0.6);
+        }
+        
+        .input-wrapper:focus-within {
+            border-color: var(--color-wisteria);
+            box-shadow: 0 0 0 3px rgba(201, 167, 235, 0.15), inset 0 1px 3px rgba(255,255,255,0.6);
+            background: white;
+        }
+        
+        .chat-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            font-family: var(--font-family-display);
+            font-size: 14px;
+            color: var(--color-deep-purple-gray);
+            outline: none;
+        }
+        
+        .chat-input::placeholder {
+            color: #B8A8C8;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+        
+        .typing-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--color-wisteria);
+            border-radius: 50%;
+            animation: typing-bounce 1.4s ease-in-out infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing-bounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-6px); opacity: 1; }
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+        
+        .send-btn {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--color-wisteria) 0%, #B895D6 100%);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 3px 10px rgba(201, 167, 235, 0.4);
+            flex-shrink: 0;
+        }
+        
+        .send-btn:active {
+            transform: scale(0.9);
+        }
+        
+        .send-btn:hover {
+            box-shadow: 0 4px 14px rgba(201, 167, 235, 0.55);
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="iphone-status-bar">
+            <span>9:41</span>
+            <div style="display: flex; gap: 6px;">
+                <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor">
+                    <path d="M1 2H4C5.1 2 6 2.9 6 4V8C6 9.1 5.1 10 4 10H1V2Z" fill="currentColor"/>
+                    <path d="M8 1H17C17.55 1 18 1.45 18 2V10C18 10.55 17.55 11 17 11H8V1Z" fill="currentColor"/>
+                </svg>
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+                    <path d="M16 8H14V6C14 4.9 13.1 4 12 4H6C4.9 4 4 4.9 4 6V12C4 13.1 4.9 14 6 14H12C13.1 14 14 13.1 14 12V10H16V8Z" fill="currentColor"/>
+                </svg>
+                <svg width="24" height="14" viewBox="0 0 24 14" fill="currentColor">
+                    <path d="M22 1H2C0.9 1 0 1.9 0 3V11C0 12.1 0.9 13 2 13H22C23.1 13 24 12.1 24 11V3C24 1.9 23.1 1 22 1Z" fill="currentColor"/>
+                    <path d="M4 5H20V9H4V5Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="chat-header">
+                <div class="header-back" onclick="goBack()">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="white">
+                        <path d="M12 15L7 10L12 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="deer-avatar-lg deer-blinking" id="chat-avatar">
+                <svg viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="27" cy="12" rx="4.8" ry="8.5" fill="#B07810" stroke="#6B4808" stroke-width="1.5" transform="rotate(-10 27 12)"/>
+                    <ellipse cx="43" cy="12" rx="4.8" ry="8.5" fill="#B07810" stroke="#6B4808" stroke-width="1.5" transform="rotate(10 43 12)"/>
+                    <circle cx="23" cy="5" r="2" fill="#D49818"/>
+                    <circle cx="30" cy="5" r="2" fill="#D49818"/>
+                    <circle cx="40" cy="5" r="2" fill="#D49818"/>
+                    <circle cx="47" cy="5" r="2" fill="#D49818"/>
+                    <ellipse cx="19" cy="22" rx="4.8" ry="5.8" fill="#F5CC60" stroke="#8B6010" stroke-width="1.5"/>
+                    <ellipse cx="51" cy="22" rx="4.8" ry="5.8" fill="#F5CC60" stroke="#8B6010" stroke-width="1.5"/>
+                    <ellipse cx="35" cy="38" rx="21" ry="18" fill="#F5CC60" stroke="#8B6010" stroke-width="2.2"/>
+                    <ellipse cx="35" cy="42" rx="13" ry="9" fill="#FFE8B0"/>
+                    <ellipse cx="27" cy="33" rx="8.5" ry="7.5" fill="#2D1810" stroke="#1A0800" stroke-width="1"/>
+                    <ellipse cx="43" cy="33" rx="8.5" ry="7.5" fill="#2D1810" stroke="#1A0800" stroke-width="1"/>
+                    <circle cx="25" cy="30.5" r="2.3" fill="white"/>
+                    <circle cx="41" cy="30.5" r="2.3" fill="white"/>
+                    <circle cx="27.5" cy="32.5" r="1.3" fill="white"/>
+                    <circle cx="43.5" cy="32.5" r="1.3" fill="white"/>
+                    <circle cx="24" cy="29" r="0.9" fill="white" opacity="0.7"/>
+                    <circle cx="40" cy="29" r="0.9" fill="white" opacity="0.7"/>
+                    <g transform="translate(20,30) scale(0.55)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700" opacity="0.9"/></g>
+                    <g transform="translate(34,30) scale(0.55)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700" opacity="0.9"/></g>
+                    <ellipse cx="35" cy="42" rx="5" ry="3" fill="#FF8080" stroke="#C04040" stroke-width="1"/>
+                    <circle cx="35" cy="41" r="1.8" fill="#FFCCBB"/>
+                    <path d="M30 46 Q35 51 40 46" stroke="#3D2010" stroke-width="2" stroke-linecap="round" fill="none"/>
+                    <circle cx="19" cy="39" r="5.5" fill="#FFCCAA" opacity="0.7"/>
+                    <circle cx="51" cy="39" r="5.5" fill="#FFCCAA" opacity="0.7"/>
+                </svg>
+            </div>
+                <div class="header-info">
+                    <h2 id="chat-display-name">小鹿陪伴官</h2>
+                    <div class="online-status">
+                        <div class="online-dot"></div>
+                        <span>在线</span>
+                    </div>
+                </div>
+                <button class="clear-btn" onclick="clearChat()">清空</button>
+            </div>
+            
+            <div class="emotion-bar">
+                <div class="emotion-tag" onclick="selectEmotion(this)">
+                    <div class="emotion-icon">
+                        <svg viewBox="0 0 32 32" fill="none">
+                            <!-- 鹿角 -->
+                            <ellipse cx="12" cy="5" rx="2.5" ry="4.5" transform="rotate(-15 12 5)" fill="#B07810" stroke="#6B4808" stroke-width="0.8"/>
+                            <ellipse cx="20" cy="5" rx="2.5" ry="4.5" transform="rotate(15 20 5)" fill="#B07810" stroke="#6B4808" stroke-width="0.8"/>
+                            <circle cx="10.5" cy="2.5" r="1" fill="#D49818" stroke="#8B6010" stroke-width="0.4"/>
+                            <circle cx="21.5" cy="2.5" r="1" fill="#D49818" stroke="#8B6010" stroke-width="0.4"/>
+                            <circle cx="16" cy="2" r="0.8" fill="#D49818" stroke="#8B6010" stroke-width="0.4"/>
+                            <!-- 鹿耳 -->
+                            <ellipse cx="10" cy="10" rx="2.5" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="0.8"/>
+                            <ellipse cx="22" cy="10" rx="2.5" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="0.8"/>
+                            <ellipse cx="9.5" cy="10" rx="1.2" ry="2" fill="#FFE8A0" opacity="0.6"/>
+                            <ellipse cx="22.5" cy="10" rx="1.2" ry="2" fill="#FFE8A0" opacity="0.6"/>
+                            <!-- 脸 -->
+                            <circle cx="16" cy="20" r="10" fill="#F5CC60" stroke="#8B6010" stroke-width="1.2"/>
+                            <ellipse cx="16" cy="23" rx="6.5" ry="4.5" fill="#FFE8B0"/>
+                            <!-- 眼睛 -->
+                            <ellipse cx="13" cy="18" rx="2.5" ry="2.8" fill="#2D1810" stroke="#1A0800" stroke-width="0.5"/>
+                            <ellipse cx="19" cy="18" rx="2.5" ry="2.8" fill="#2D1810" stroke="#1A0800" stroke-width="0.5"/>
+                            <!-- 睫毛 -->
+                            <path d="M11.2 16.5 L10 15" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M12.5 15.8 L12 14.2" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M14.2 16 L15 14.5" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M20.8 16.5 L22 15" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M19.5 15.8 L20 14.2" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M17.8 16 L17 14.5" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <!-- 眼高光 -->
+                            <circle cx="12.5" cy="17.2" r="0.9" fill="white"/>
+                            <circle cx="18.5" cy="17.2" r="0.9" fill="white"/>
+                            <circle cx="13.5" cy="19" r="0.5" fill="white"/>
+                            <circle cx="19.5" cy="19" r="0.5" fill="white"/>
+                            <!-- 爱心高光 -->
+                            <path d="M13 16 C12.5 15.2 11.5 15.5 11.8 16.5 L12 17.2 L12.5 16.5 C13 16.2 12.8 15.5 13 16 Z" fill="white" opacity="0.9"/>
+                            <path d="M19 16 C18.5 15.2 17.5 15.5 17.8 16.5 L18 17.2 L18.5 16.5 C19 16.2 18.8 15.5 19 16 Z" fill="white" opacity="0.9"/>
+                            <!-- 金色星星 -->
+                            <g transform="translate(8.5,15) scale(0.35)"><polygon points="0,-4 1.2,-1 4,-1 2,1 2.5,4 0,2 -2.5,4 -2,1 -4,-1 -1.2,-1" fill="#FFD700" opacity="0.9"/></g>
+                            <g transform="translate(22,15) scale(0.35)"><polygon points="0,-4 1.2,-1 4,-1 2,1 2.5,4 0,2 -2.5,4 -2,1 -4,-1 -1.2,-1" fill="#FFD700" opacity="0.9"/></g>
+                            <!-- 鼻子 -->
+                            <ellipse cx="16" cy="22" rx="2.5" ry="1.8" fill="#FF8080" stroke="#C04040" stroke-width="0.6"/>
+                            <circle cx="16" cy="21.5" r="1" fill="#FFCCBB"/>
+                            <!-- 嘴 - 焦虑的W嘴 -->
+                            <path d="M13 25 Q14.5 24 16 25 Q17.5 24 19 25" stroke="#3D2010" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+                            <!-- 腮红 -->
+                            <ellipse cx="9" cy="21" rx="3" ry="2" fill="#FFCCAA" opacity="0.7"/>
+                            <ellipse cx="23" cy="21" rx="3" ry="2" fill="#FFCCAA" opacity="0.7"/>
+                            <ellipse cx="8.5" cy="20.3" rx="1.2" ry="0.6" fill="white" opacity="0.45"/>
+                            <ellipse cx="22.5" cy="20.3" rx="1.2" ry="0.6" fill="white" opacity="0.45"/>
+                        </svg>
+                    </div>
+                    <span>焦虑</span>
+                </div>
+                <div class="emotion-tag" onclick="selectEmotion(this)">
+                    <div class="emotion-icon">
+                        <svg viewBox="0 0 32 32" fill="none">
+                            <!-- 短耳 -->
+                            <ellipse cx="10" cy="10" rx="5" ry="7" fill="#FFB3BA" stroke="#E87080" stroke-width="1"/>
+                            <ellipse cx="22" cy="10" rx="5" ry="7" fill="#FFB3BA" stroke="#E87080" stroke-width="1"/>
+                            <ellipse cx="10" cy="11" rx="2.5" ry="4.5" fill="#FF808A"/>
+                            <ellipse cx="22" cy="11" rx="2.5" ry="4.5" fill="#FF808A"/>
+                            <!-- 耳内高光 -->
+                            <ellipse cx="9.5" cy="9" rx="1.2" ry="2" fill="#FFD0D4" opacity="0.6"/>
+                            <ellipse cx="22.5" cy="9" rx="1.2" ry="2" fill="#FFD0D4" opacity="0.6"/>
+                            <!-- 脸 -->
+                            <circle cx="16" cy="22" r="10" fill="#FFB3BA" stroke="#E87080" stroke-width="1.2"/>
+                            <ellipse cx="16" cy="25" rx="7" ry="4.5" fill="#FFD8DC"/>
+                            <!-- 眼睛 - 烦躁的斜眼 -->
+                            <ellipse cx="13" cy="20" rx="2.5" ry="2.8" fill="#2D1810" stroke="#1A0800" stroke-width="0.5"/>
+                            <ellipse cx="19" cy="20" rx="2.5" ry="2.8" fill="#2D1810" stroke="#1A0800" stroke-width="0.5"/>
+                            <!-- 睫毛 -->
+                            <path d="M11.2 18.5 L10 17" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M12.5 17.8 L12 16.2" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M14.2 18 L15 16.5" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M20.8 18.5 L22 17" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M19.5 17.8 L20 16.2" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M17.8 18 L17 16.5" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <!-- 眼高光 -->
+                            <circle cx="12.5" cy="19.2" r="0.9" fill="white"/>
+                            <circle cx="18.5" cy="19.2" r="0.9" fill="white"/>
+                            <circle cx="13.5" cy="21" r="0.5" fill="white"/>
+                            <circle cx="19.5" cy="21" r="0.5" fill="white"/>
+                            <!-- 金色星星 -->
+                            <g transform="translate(8.5,17) scale(0.35)"><polygon points="0,-4 1.2,-1 4,-1 2,1 2.5,4 0,2 -2.5,4 -2,1 -4,-1 -1.2,-1" fill="#FFD700" opacity="0.9"/></g>
+                            <g transform="translate(22,17) scale(0.35)"><polygon points="0,-4 1.2,-1 4,-1 2,1 2.5,4 0,2 -2.5,4 -2,1 -4,-1 -1.2,-1" fill="#FFD700" opacity="0.9"/></g>
+                            <!-- 鼻子 -->
+                            <ellipse cx="16" cy="24" rx="2.5" ry="1.8" fill="#FF6B6B" stroke="#C04040" stroke-width="0.6"/>
+                            <circle cx="16" cy="23.5" r="1" fill="#FFCCBB"/>
+                            <!-- 嘴 - 烦躁的瘪嘴 -->
+                            <path d="M13 27 Q16 26 19 27" stroke="#3D2010" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+                            <!-- 腮红 -->
+                            <ellipse cx="9" cy="23" rx="3" ry="2" fill="#FF9EAE" opacity="0.6"/>
+                            <ellipse cx="23" cy="23" rx="3" ry="2" fill="#FF9EAE" opacity="0.6"/>
+                            <ellipse cx="8.5" cy="22.3" rx="1.2" ry="0.6" fill="white" opacity="0.4"/>
+                            <ellipse cx="22.5" cy="22.3" rx="1.2" ry="0.6" fill="white" opacity="0.4"/>
+                        </svg>
+                    </div>
+                    <span>烦躁</span>
+                </div>
+                <div class="emotion-tag" onclick="selectEmotion(this)">
+                    <div class="emotion-icon">
+                        <svg viewBox="0 0 32 32" fill="none">
+                            <!-- 圆耳朵 -->
+                            <circle cx="10" cy="8" r="3.5" fill="#D0B8E8" stroke="#8B6BB8" stroke-width="0.8"/>
+                            <circle cx="22" cy="8" r="3.5" fill="#D0B8E8" stroke="#8B6BB8" stroke-width="0.8"/>
+                            <circle cx="10" cy="8" r="2" fill="#E8D5F5"/>
+                            <circle cx="22" cy="8" r="2" fill="#E8D5F5"/>
+                            <!-- 脸 -->
+                            <circle cx="16" cy="17" r="11" fill="#D0B8E8" stroke="#8B6BB8" stroke-width="1.2"/>
+                            <ellipse cx="16" cy="20" rx="7" ry="5" fill="#EDE0F8"/>
+                            <!-- 眼睛 - 疲倦的半闭眼，眼皮下垂 -->
+                            <path d="M9 15 Q11 16 13 15" stroke="#2D1810" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                            <path d="M19 15 Q21 16 23 15" stroke="#2D1810" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                            <!-- 上眼皮（表示很困） -->
+                            <path d="M9 13.5 Q11 12.5 13 13.5" stroke="#2D1810" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                            <path d="M19 13.5 Q21 12.5 23 13.5" stroke="#2D1810" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                            <!-- 睫毛 - 下垂的睫毛表示困倦 -->
+                            <path d="M9.5 14.5 L9 13.2" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M11 15 L10.8 13.5" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M12.5 14.5 L13 13.2" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M22.5 14.5 L23 13.2" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M21 15 L21.2 13.5" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M19.5 14.5 L19 13.2" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <!-- 金色星星 -->
+                            <g transform="translate(7,11) scale(0.3)"><polygon points="0,-4 1.2,-1 4,-1 2,1 2.5,4 0,2 -2.5,4 -2,1 -4,-1 -1.2,-1" fill="#FFD700" opacity="0.7"/></g>
+                            <g transform="translate(23,11) scale(0.3)"><polygon points="0,-4 1.2,-1 4,-1 2,1 2.5,4 0,2 -2.5,4 -2,1 -4,-1 -1.2,-1" fill="#FFD700" opacity="0.7"/></g>
+                            <!-- 鼻子 -->
+                            <ellipse cx="16" cy="19" rx="2.5" ry="2" fill="#FF6B6B" stroke="#C04040" stroke-width="0.6"/>
+                            <circle cx="16" cy="18.5" r="1" fill="#FFCCBB"/>
+                            <!-- 嘴 - 疲倦的下垂嘴，没精神 -->
+                            <path d="M13 23 Q16 25 19 23" stroke="#3D2010" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+                            <!-- 小哈欠气泡 -->
+                            <circle cx="25" cy="20" r="1.5" fill="#E8D5F5" stroke="#8B6BB8" stroke-width="0.5" opacity="0.8"/>
+                            <text x="25" y="20.8" text-anchor="middle" font-size="3" fill="#8B6BB8" opacity="0.7">Z</text>
+                            <!-- 腮红 -->
+                            <ellipse cx="9" cy="18" rx="3" ry="2" fill="#FFB3BA" opacity="0.6"/>
+                            <ellipse cx="23" cy="18" rx="3" ry="2" fill="#FFB3BA" opacity="0.6"/>
+                            <ellipse cx="8.5" cy="17.3" rx="1.2" ry="0.6" fill="white" opacity="0.4"/>
+                            <ellipse cx="22.5" cy="17.3" rx="1.2" ry="0.6" fill="white" opacity="0.4"/>
+                        </svg>
+                    </div>
+                    <span>疲倦</span>
+                </div>
+                <div class="emotion-tag active" onclick="selectEmotion(this)">
+                    <div class="emotion-icon">
+                        <svg viewBox="0 0 32 32" fill="none">
+                            <!-- 长耳 -->
+                            <ellipse cx="10" cy="8" rx="3.5" ry="9" fill="#FFB3BA" stroke="#E87080" stroke-width="1"/>
+                            <ellipse cx="22" cy="8" rx="3.5" ry="9" fill="#FFB3BA" stroke="#E87080" stroke-width="1"/>
+                            <ellipse cx="10" cy="10" rx="1.8" ry="5.5" fill="#FF808A"/>
+                            <ellipse cx="22" cy="10" rx="1.8" ry="5.5" fill="#FF808A"/>
+                            <!-- 耳内纹理 -->
+                            <path d="M8.5 5 Q9 7 8.5 9" stroke="#E86870" stroke-width="0.6" fill="none" opacity="0.5"/>
+                            <path d="M11.5 4 Q12 6 11.5 8" stroke="#E86870" stroke-width="0.6" fill="none" opacity="0.5"/>
+                            <path d="M23.5 5 Q23 7 23.5 9" stroke="#E86870" stroke-width="0.6" fill="none" opacity="0.5"/>
+                            <path d="M20.5 4 Q20 6 20.5 8" stroke="#E86870" stroke-width="0.6" fill="none" opacity="0.5"/>
+                            <!-- 头顶呆毛 -->
+                            <path d="M16 13 Q15 10 17 9 Q19 11 18 13" stroke="#E87080" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+                            <!-- 脸 -->
+                            <circle cx="16" cy="22" r="10" fill="#FFB3BA" stroke="#E87080" stroke-width="1.2"/>
+                            <ellipse cx="16" cy="25" rx="7" ry="4.5" fill="#FFD8DC"/>
+                            <!-- 眼睛 - 平静的淡定点，不是笑的 -->
+                            <ellipse cx="13" cy="20" rx="2" ry="1.8" fill="#2D1810" stroke="#1A0800" stroke-width="0.5"/>
+                            <ellipse cx="19" cy="20" rx="2" ry="1.8" fill="#2D1810" stroke="#1A0800" stroke-width="0.5"/>
+                            <!-- 睫毛 -->
+                            <path d="M11.5 18.8 L10.5 17.5" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M13.2 18.5 L12.8 17" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M14.8 19 L15.5 17.8" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M20.5 18.8 L21.5 17.5" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M18.8 18.5 L19.2 17" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M17.2 19 L16.5 17.8" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <!-- 眼高光 - 平静的小高光 -->
+                            <circle cx="12.5" cy="19.5" r="0.6" fill="white" opacity="0.8"/>
+                            <circle cx="18.5" cy="19.5" r="0.6" fill="white" opacity="0.8"/>
+                            <!-- 金色星星 -->
+                            <g transform="translate(8.5,17) scale(0.3)"><polygon points="0,-4 1.2,-1 4,-1 2,1 2.5,4 0,2 -2.5,4 -2,1 -4,-1 -1.2,-1" fill="#FFD700" opacity="0.7"/></g>
+                            <g transform="translate(22,17) scale(0.3)"><polygon points="0,-4 1.2,-1 4,-1 2,1 2.5,4 0,2 -2.5,4 -2,1 -4,-1 -1.2,-1" fill="#FFD700" opacity="0.7"/></g>
+                            <!-- 鼻子 -->
+                            <ellipse cx="16" cy="24" rx="2.5" ry="1.8" fill="#FF6B6B" stroke="#C04040" stroke-width="0.6"/>
+                            <circle cx="16" cy="23.5" r="1" fill="#FFCCBB"/>
+                            <!-- 嘴 - 平静的直线嘴，淡定不笑 -->
+                            <line x1="14" y1="27" x2="18" y2="27" stroke="#3D2010" stroke-width="1.3" stroke-linecap="round"/>
+                            <!-- 腮红 -->
+                            <ellipse cx="9" cy="23" rx="3" ry="2" fill="#FF9EAE" opacity="0.6"/>
+                            <ellipse cx="23" cy="23" rx="3" ry="2" fill="#FF9EAE" opacity="0.6"/>
+                            <ellipse cx="8.5" cy="22.3" rx="1.2" ry="0.6" fill="white" opacity="0.4"/>
+                            <ellipse cx="22.5" cy="22.3" rx="1.2" ry="0.6" fill="white" opacity="0.4"/>
+                        </svg>
+                    </div>
+                    <span>平静</span>
+                </div>
+                <div class="emotion-tag" onclick="selectEmotion(this)">
+                    <div class="emotion-icon">
+                        <svg viewBox="0 0 32 32" fill="none">
+                            <!-- 鹿角 -->
+                            <ellipse cx="12" cy="5" rx="2.5" ry="4.5" transform="rotate(-15 12 5)" fill="#B07810" stroke="#6B4808" stroke-width="0.8"/>
+                            <ellipse cx="20" cy="5" rx="2.5" ry="4.5" transform="rotate(15 20 5)" fill="#B07810" stroke="#6B4808" stroke-width="0.8"/>
+                            <circle cx="10.5" cy="2.5" r="1" fill="#D49818" stroke="#8B6010" stroke-width="0.4"/>
+                            <circle cx="21.5" cy="2.5" r="1" fill="#D49818" stroke="#8B6010" stroke-width="0.4"/>
+                            <circle cx="16" cy="2" r="0.8" fill="#D49818" stroke="#8B6010" stroke-width="0.4"/>
+                            <!-- 鹿耳 -->
+                            <ellipse cx="10" cy="10" rx="2.5" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="0.8"/>
+                            <ellipse cx="22" cy="10" rx="2.5" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="0.8"/>
+                            <ellipse cx="9.5" cy="10" rx="1.2" ry="2" fill="#FFE8A0" opacity="0.6"/>
+                            <ellipse cx="22.5" cy="10" rx="1.2" ry="2" fill="#FFE8A0" opacity="0.6"/>
+                            <!-- 脸 -->
+                            <circle cx="16" cy="20" r="10" fill="#F5CC60" stroke="#8B6010" stroke-width="1.2"/>
+                            <ellipse cx="16" cy="23" rx="6.5" ry="4.5" fill="#FFE8B0"/>
+                            <!-- 眼睛 -->
+                            <ellipse cx="13" cy="18" rx="2.5" ry="2.8" fill="#2D1810" stroke="#1A0800" stroke-width="0.5"/>
+                            <ellipse cx="19" cy="18" rx="2.5" ry="2.8" fill="#2D1810" stroke="#1A0800" stroke-width="0.5"/>
+                            <!-- 睫毛 -->
+                            <path d="M11.2 16.5 L10 15" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M12.5 15.8 L12 14.2" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M14.2 16 L15 14.5" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M20.8 16.5 L22 15" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M19.5 15.8 L20 14.2" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <path d="M17.8 16 L17 14.5" stroke="#2D1810" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+                            <!-- 眼高光 -->
+                            <circle cx="12.5" cy="17.2" r="0.9" fill="white"/>
+                            <circle cx="18.5" cy="17.2" r="0.9" fill="white"/>
+                            <circle cx="13.5" cy="19" r="0.5" fill="white"/>
+                            <circle cx="19.5" cy="19" r="0.5" fill="white"/>
+                            <!-- 爱心高光 -->
+                            <path d="M13 16 C12.5 15.2 11.5 15.5 11.8 16.5 L12 17.2 L12.5 16.5 C13 16.2 12.8 15.5 13 16 Z" fill="white" opacity="0.9"/>
+                            <path d="M19 16 C18.5 15.2 17.5 15.5 17.8 16.5 L18 17.2 L18.5 16.5 C19 16.2 18.8 15.5 19 16 Z" fill="white" opacity="0.9"/>
+                            <!-- 金色星星 -->
+                            <g transform="translate(8.5,15) scale(0.35)"><polygon points="0,-4 1.2,-1 4,-1 2,1 2.5,4 0,2 -2.5,4 -2,1 -4,-1 -1.2,-1" fill="#FFD700" opacity="0.9"/></g>
+                            <g transform="translate(22,15) scale(0.35)"><polygon points="0,-4 1.2,-1 4,-1 2,1 2.5,4 0,2 -2.5,4 -2,1 -4,-1 -1.2,-1" fill="#FFD700" opacity="0.9"/></g>
+                            <!-- 鼻子 -->
+                            <ellipse cx="16" cy="22" rx="2.5" ry="1.8" fill="#FF8080" stroke="#C04040" stroke-width="0.6"/>
+                            <circle cx="16" cy="21.5" r="1" fill="#FFCCBB"/>
+                            <!-- 嘴 - 自信的笑 -->
+                            <path d="M12 24 Q16 28 20 24" stroke="#3D2010" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+                            <!-- 腮红 -->
+                            <ellipse cx="9" cy="21" rx="3" ry="2" fill="#FFCCAA" opacity="0.7"/>
+                            <ellipse cx="23" cy="21" rx="3" ry="2" fill="#FFCCAA" opacity="0.7"/>
+                            <ellipse cx="8.5" cy="20.3" rx="1.2" ry="0.6" fill="white" opacity="0.45"/>
+                            <ellipse cx="22.5" cy="20.3" rx="1.2" ry="0.6" fill="white" opacity="0.45"/>
+                        </svg>
+                    </div>
+                    <span>有动力</span>
+                </div>
+            </div>
+            
+            <div class="chat-messages">
+                <div class="system-message">
+                    <div class="system-content">
+                        <div class="system-deer">
+                            <svg viewBox="0 0 40 40" fill="none">
+                                <ellipse cx="15" cy="7" rx="2.8" ry="5" fill="#B07810" stroke="#6B4808" stroke-width="1" transform="rotate(-10 15 7)"/>
+                                <ellipse cx="25" cy="7" rx="2.8" ry="5" fill="#B07810" stroke="#6B4808" stroke-width="1" transform="rotate(10 25 7)"/>
+                                <circle cx="13" cy="3" r="1.2" fill="#D49818"/>
+                                <circle cx="17" cy="3" r="1.2" fill="#D49818"/>
+                                <circle cx="23" cy="3" r="1.2" fill="#D49818"/>
+                                <circle cx="27" cy="3" r="1.2" fill="#D49818"/>
+                                <ellipse cx="11" cy="14" rx="2.8" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1"/>
+                                <ellipse cx="29" cy="14" rx="2.8" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1"/>
+                                <ellipse cx="20" cy="22" rx="12" ry="10.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1.8"/>
+                                <ellipse cx="20" cy="25" rx="7.5" ry="5.5" fill="#FFE8B0"/>
+                                <ellipse cx="15" cy="20" rx="5" ry="4.5" fill="#2D1810" stroke="#1A0800" stroke-width="0.6"/>
+                                <ellipse cx="25" cy="20" rx="5" ry="4.5" fill="#2D1810" stroke="#1A0800" stroke-width="0.6"/>
+                                <circle cx="13.5" cy="18.5" r="1.4" fill="white"/>
+                                <circle cx="23.5" cy="18.5" r="1.4" fill="white"/>
+                                <circle cx="16" cy="20.5" r="0.8" fill="white"/>
+                                <circle cx="26" cy="20.5" r="0.8" fill="white"/>
+                                <circle cx="12.5" cy="17.5" r="0.6" fill="white" opacity="0.7"/>
+                                <circle cx="22.5" cy="17.5" r="0.6" fill="white" opacity="0.7"/>
+                                <g transform="translate(11,18) scale(0.35)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700" opacity="0.9"/></g>
+                                <g transform="translate(21,18) scale(0.35)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700" opacity="0.9"/></g>
+                                <ellipse cx="20" cy="25" rx="3" ry="2" fill="#FF8080" stroke="#C04040" stroke-width="0.6"/>
+                                <circle cx="20" cy="24.5" r="1.2" fill="#FFCCBB"/>
+                                <path d="M17 28 Q20 31 23 28" stroke="#3D2010" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+                                <circle cx="9" cy="23" r="3.5" fill="#FFCCAA" opacity="0.7"/>
+                                <circle cx="31" cy="23" r="3.5" fill="#FFCCAA" opacity="0.7"/>
+                                <rect x="8" y="32" width="24" height="6" rx="2" fill="#FF6B6B"/>
+                                <text x="20" y="36" text-anchor="middle" fill="white" font-size="7">隐私承诺</text>
+                            </svg>
+                        </div>
+                        <p>你的对话内容仅保存在本地，不会上传到服务器哦~</p>
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-avatar">
+                        <svg viewBox="0 0 40 40" fill="none">
+                            <ellipse cx="15" cy="7" rx="2.8" ry="5" fill="#B07810" stroke="#6B4808" stroke-width="1" transform="rotate(-10 15 7)"/>
+                            <ellipse cx="25" cy="7" rx="2.8" ry="5" fill="#B07810" stroke="#6B4808" stroke-width="1" transform="rotate(10 25 7)"/>
+                            <circle cx="13" cy="3" r="1.2" fill="#D49818"/>
+                            <circle cx="17" cy="3" r="1.2" fill="#D49818"/>
+                            <circle cx="23" cy="3" r="1.2" fill="#D49818"/>
+                            <circle cx="27" cy="3" r="1.2" fill="#D49818"/>
+                            <ellipse cx="11" cy="14" rx="2.8" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1"/>
+                            <ellipse cx="29" cy="14" rx="2.8" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1"/>
+                            <ellipse cx="20" cy="22" rx="12" ry="10.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1.8"/>
+                            <ellipse cx="20" cy="25" rx="7.5" ry="5.5" fill="#FFE8B0"/>
+                            <ellipse cx="15" cy="20" rx="5" ry="4.5" fill="#2D1810" stroke="#1A0800" stroke-width="0.6"/>
+                            <ellipse cx="25" cy="20" rx="5" ry="4.5" fill="#2D1810" stroke="#1A0800" stroke-width="0.6"/>
+                            <circle cx="13.5" cy="18.5" r="1.4" fill="white"/>
+                            <circle cx="23.5" cy="18.5" r="1.4" fill="white"/>
+                            <circle cx="16" cy="20.5" r="0.8" fill="white"/>
+                            <circle cx="26" cy="20.5" r="0.8" fill="white"/>
+                            <circle cx="12.5" cy="17.5" r="0.6" fill="white" opacity="0.7"/>
+                            <circle cx="22.5" cy="17.5" r="0.6" fill="white" opacity="0.7"/>
+                            <g transform="translate(11,18) scale(0.35)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700" opacity="0.9"/></g>
+                            <g transform="translate(21,18) scale(0.35)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700" opacity="0.9"/></g>
+                            <ellipse cx="20" cy="25" rx="3" ry="2" fill="#FF8080" stroke="#C04040" stroke-width="0.6"/>
+                            <circle cx="20" cy="24.5" r="1.2" fill="#FFCCBB"/>
+                            <path d="M17 28 Q20 31 23 28" stroke="#3D2010" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+                            <circle cx="9" cy="23" r="3.5" fill="#FFCCAA" opacity="0.7"/>
+                            <circle cx="31" cy="23" r="3.5" fill="#FFCCAA" opacity="0.7"/>
+                        </svg>
+                    </div>
+                    <div class="message-bubble ai">
+                        <p class="message-text" id="welcome-msg-1">呜~ 小鹿来啦！🥰 今天宝宝想聊什么呢？小鹿会一直陪着你哒~ 💖</p>
+                    </div>
+                </div>
+                
+                <div class="message user">
+                    <div class="message-avatar">
+                        <svg viewBox="0 0 40 40" fill="none">
+                            <circle cx="20" cy="20" r="12" fill="#B5EAD7"/>
+                            <circle cx="16" cy="18" r="2.5" fill="#3D334A"/>
+                            <circle cx="24" cy="18" r="2.5" fill="#3D334A"/>
+                            <circle cx="17" cy="17" r="1" fill="white"/>
+                            <circle cx="25" cy="17" r="1" fill="white"/>
+                            <path d="M15 24 Q20 28 25 24" stroke="#3D334A" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                    <div class="message-bubble user">
+                        <p class="message-text user">今天工作效率有点低，感觉好焦虑呀...</p>
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-avatar">
+                        <svg viewBox="0 0 40 40" fill="none">
+                            <ellipse cx="15" cy="7" rx="2.8" ry="5" fill="#B07810" stroke="#6B4808" stroke-width="1" transform="rotate(-10 15 7)"/>
+                            <ellipse cx="25" cy="7" rx="2.8" ry="5" fill="#B07810" stroke="#6B4808" stroke-width="1" transform="rotate(10 25 7)"/>
+                            <circle cx="13" cy="3" r="1.2" fill="#D49818"/>
+                            <circle cx="17" cy="3" r="1.2" fill="#D49818"/>
+                            <circle cx="23" cy="3" r="1.2" fill="#D49818"/>
+                            <circle cx="27" cy="3" r="1.2" fill="#D49818"/>
+                            <ellipse cx="11" cy="14" rx="2.8" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1"/>
+                            <ellipse cx="29" cy="14" rx="2.8" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1"/>
+                            <ellipse cx="20" cy="22" rx="12" ry="10.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1.8"/>
+                            <ellipse cx="20" cy="25" rx="7.5" ry="5.5" fill="#FFE8B0"/>
+                            <ellipse cx="15" cy="20" rx="5" ry="4.5" fill="#2D1810" stroke="#1A0800" stroke-width="0.6"/>
+                            <ellipse cx="25" cy="20" rx="5" ry="4.5" fill="#2D1810" stroke="#1A0800" stroke-width="0.6"/>
+                            <circle cx="13.5" cy="18.5" r="1.4" fill="white"/>
+                            <circle cx="23.5" cy="18.5" r="1.4" fill="white"/>
+                            <circle cx="16" cy="20.5" r="0.8" fill="white"/>
+                            <circle cx="26" cy="20.5" r="0.8" fill="white"/>
+                            <circle cx="12.5" cy="17.5" r="0.6" fill="white" opacity="0.7"/>
+                            <circle cx="22.5" cy="17.5" r="0.6" fill="white" opacity="0.7"/>
+                            <g transform="translate(11,18) scale(0.35)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700" opacity="0.9"/></g>
+                            <g transform="translate(21,18) scale(0.35)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700" opacity="0.9"/></g>
+                            <ellipse cx="20" cy="25" rx="3" ry="2" fill="#FF8080" stroke="#C04040" stroke-width="0.6"/>
+                            <circle cx="20" cy="24.5" r="1.2" fill="#FFCCBB"/>
+                            <path d="M17 28 Q20 31 23 28" stroke="#3D2010" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+                            <circle cx="9" cy="23" r="3.5" fill="#FFCCAA" opacity="0.7"/>
+                            <circle cx="31" cy="23" r="3.5" fill="#FFCCAA" opacity="0.7"/>
+                        </svg>
+                    </div>
+                    <div class="message-bubble ai">
+                        <p class="message-text" id="welcome-msg-2">摸摸头~ 🐾 宝宝不要难过嘛，焦虑的时候小鹿会一直陪着你的哦~ 要不我们先吃一个小番茄吧？就25分钟，小鹿陪你一起专注，好不好呀？😘</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-commands">
+                <div class="quick-btn" onclick="sendQuickMessage('tired')">
+                    <div class="quick-icon">
+                        <svg viewBox="0 0 32 32" fill="none">
+                            <circle cx="16" cy="16" r="12" fill="#D0B8E8" stroke="#8B6BB8" stroke-width="1.2"/>
+                            <circle cx="12" cy="14" r="3.5" fill="#2D1810"/>
+                            <circle cx="20" cy="14" r="3.5" fill="#2D1810"/>
+                            <circle cx="13" cy="13" r="1.2" fill="white"/>
+                            <circle cx="21" cy="13" r="1.2" fill="white"/>
+                            <path d="M10 18 Q16 22 22 18" stroke="#3D2010" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                            <ellipse cx="9" cy="16" rx="2.5" ry="1.5" fill="#FFCCAA" opacity="0.6"/>
+                            <ellipse cx="23" cy="16" rx="2.5" ry="1.5" fill="#FFCCAA" opacity="0.6"/>
+                        </svg>
+                    </div>
+                    <span>我有点累了</span>
+                </div>
+                <div class="quick-btn" onclick="sendQuickMessage('unfocus')">
+                    <div class="quick-icon">
+                        <svg viewBox="0 0 32 32" fill="none">
+                            <circle cx="16" cy="16" r="12" fill="#FFB3BA" stroke="#E87080" stroke-width="1.2"/>
+                            <ellipse cx="12" cy="14" rx="3" ry="3.5" fill="#2D1810"/>
+                            <ellipse cx="20" cy="14" rx="3" ry="3.5" fill="#2D1810"/>
+                            <circle cx="13" cy="13" r="1.2" fill="white"/>
+                            <circle cx="21" cy="13" r="1.2" fill="white"/>
+                            <path d="M11 20 L14 17 M14 20 L11 17" stroke="#3D2010" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M18 20 L21 17 M21 20 L18 17" stroke="#3D2010" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <span>专注不下去</span>
+                </div>
+                <div class="quick-btn" onclick="sendQuickMessage('encourage')">
+                    <div class="quick-icon">
+                        <svg viewBox="0 0 32 32" fill="none">
+                            <path d="M16 28 C16 28 5 20 5 12 C5 8 8 5 12 5 C14.5 5 16.5 6.5 16 9 C15.5 6.5 17.5 5 20 5 C24 5 27 8 27 12 C27 20 16 28 16 28Z" fill="#FF6B6B" stroke="#C04040" stroke-width="1.5" stroke-linejoin="round"/>
+                            <ellipse cx="11" cy="11" rx="2" ry="2.5" fill="white" opacity="0.5" transform="rotate(-20 11 11)"/>
+                            <ellipse cx="21" cy="11" rx="2" ry="2.5" fill="white" opacity="0.5" transform="rotate(20 21 11)"/>
+                            <g transform="translate(8,20) scale(0.35)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700"/></g>
+                            <g transform="translate(22,8) scale(0.3)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700"/></g>
+                        </svg>
+                    </div>
+                    <span>求鼓励</span>
+                </div>
+                <div class="quick-btn" onclick="sendQuickMessage('chat')">
+                    <div class="quick-icon">
+                        <svg viewBox="0 0 32 32" fill="none">
+                            <rect x="5" y="8" width="22" height="16" rx="4" fill="#E8D5F5" stroke="#8B6BB8" stroke-width="1.2"/>
+                            <path d="M5 22 L9 24 L9 28 L13 24 L18 22" fill="#E8D5F5" stroke="#8B6BB8" stroke-width="1.2"/>
+                            <circle cx="12" cy="16" r="1.5" fill="#8B6BB8"/>
+                            <circle cx="16" cy="16" r="1.5" fill="#8B6BB8"/>
+                            <circle cx="20" cy="16" r="1.5" fill="#8B6BB8"/>
+                        </svg>
+                    </div>
+                    <span>聊聊天</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <div class="input-wrapper">
+                <input type="text" class="chat-input" placeholder="输入消息..." onkeypress="handleKeyPress(event)">
+                <button class="send-btn" onclick="sendMessage()">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="white">
+                        <path d="M5 4L13 9L5 14" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="nav-bar">
+            <div class="nav-item" onclick="openPage('home.html')">
+                <svg viewBox="0 0 48 48" fill="currentColor">
+                    <circle cx="24" cy="24" r="20" fill="none" stroke="#E8D5F5" stroke-width="3"/>
+                    <circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="4" stroke-dasharray="113" stroke-dashoffset="30" stroke-linecap="round"/>
+                    <circle cx="24" cy="24" r="2.5" fill="currentColor"/>
+                    <line x1="24" y1="24" x2="24" y2="10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="24" y1="24" x2="32" y2="24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+                <span>计时</span>
+            </div>
+            <div class="nav-item" onclick="openPage('task-plan.html')">
+                <svg viewBox="0 0 48 48" fill="currentColor">
+                    <ellipse cx="20" cy="12" rx="4" ry="12" fill="#FFF3E0"/>
+                    <ellipse cx="28" cy="12" rx="4" ry="12" fill="#FFF3E0"/>
+                    <circle cx="24" cy="28" r="12" fill="#FFF3E0"/>
+                    <circle cx="20" cy="26" r="2.5" fill="currentColor"/>
+                    <circle cx="28" cy="26" r="2.5" fill="currentColor"/>
+                    <rect x="14" y="38" width="20" height="8" rx="2" fill="#C9A7EB"/>
+                    <line x1="16" y1="42" x2="32" y2="42" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <span>任务</span>
+            </div>
+            <div class="nav-item" onclick="openPage('dashboard.html')">
+                <svg viewBox="0 0 48 48" fill="currentColor">
+                    <rect x="8" y="10" width="12" height="28" rx="2" fill="#E8D5F5"/>
+                    <rect x="20" y="18" width="12" height="20" rx="2" fill="#C9A7EB"/>
+                    <rect x="32" y="14" width="12" height="24" rx="2" fill="#FFB3BA"/>
+                </svg>
+                <span>数据</span>
+            </div>
+            <div class="nav-item" onclick="openPage('settings.html')">
+                <svg viewBox="0 0 48 48" fill="currentColor">
+                    <circle cx="24" cy="24" r="6" fill="#C9A7EB"/>
+                    <circle cx="24" cy="24" r="16" fill="none" stroke="currentColor" stroke-width="4"/>
+                    <circle cx="24" cy="8" r="3" fill="currentColor"/>
+                    <circle cx="40" cy="24" r="3" fill="currentColor"/>
+                    <circle cx="24" cy="40" r="3" fill="currentColor"/>
+                    <circle cx="8" cy="24" r="3" fill="currentColor"/>
+                </svg>
+                <span>设置</span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="assets/js/common.js"></script>
+    <script>
+        function getEmotionResponses() {
+            const deerName = getDeerName();
+            const call = getDeerCall();
+            return {
+                '焦虑': [
+                    `呜~ ${call}不要焦虑嘛 🥺 ${deerName}抱抱你！焦虑的时候说明${call}很在意这件事呢，这是好事哦~ 要不我们先深呼吸一下，然后${deerName}陪你一起面对，好不好呀？💖`,
+                    `摸摸头~ 🐾 ${call}焦虑的时候，${deerName}会一直陪着你哒！我们先喝口水，然后一起列个小小的清单，一件一件来做，慢慢就不焦虑啦~ 😘`,
+                    `${call}~ 焦虑是小怪兽，但${call}是更厉害的大英雄呀！🦸 ${deerName}相信${call}一定能搞定一切哒！来，先跟${deerName}笑一个~ 😊`
+                ],
+                '烦躁': [
+                    `摸摸头~ 🐾 ${call}烦躁的时候，${deerName}最心疼了！来，跟${deerName}一起数到三，把烦躁都吹走~ 呼~ 是不是好一点啦？😘`,
+                    `哎呀呀，${call}别烦啦~ 🥺 ${deerName}给你跳个舞好不好？转圈圈~ 转圈圈~ 嘻嘻，有没有笑一下呀？💕`,
+                    `呼—— 跟${deerName}一起深呼吸！吸——呼—— 烦躁飞走啦~ 🍃 ${call}好棒，心情平复下来就成功了一半哦！`
+                ],
+                '疲倦': [
+                    `哎呀${call}累了对不对？🥺 ${deerName}帮你揉揉肩膀~ 要不要站起来走走，喝杯水，让眼睛休息一下呀？${deerName}会一直在这里等${call}回来哒！💤`,
+                    `辛苦啦${call}~ 🌙 ${deerName}知道你已经很努力了！累了就小憩一下吧，眯五分钟也是好的，${deerName}帮你守着时间哦~ 😴`,
+                    `呜~ ${call}今天真的好努力呀！🥺 但是休息也是很重要的事情哦！${deerName}陪${call}一起做个眼部按摩，闭上眼睛放松一下~ ✨`
+                ],
+                '平静': [
+                    `嘻嘻~ ${call}今天状态好好哦！🥰 平静的时候最适合专注啦，${deerName}好开心能陪在${call}身边~ 我们一起加油吧！✨`,
+                    `哇，${call}现在的状态好棒呀~ 🌟 就像平静的湖面一样，${deerName}觉得${call}真的好厉害！继续保持哦，${deerName}给${call}点赞！👍`,
+                    `嗯嗯~ ${call}平静的样子最迷人啦！🥰 这种时候最适合开始专注做事了，${deerName}相信${call}今天一定会超高效的！🚀`
+                ],
+                '有动力': [
+                    `哇！${call}好棒！💪 ${deerName}也充满干劲啦！今天一定能完成好多事情呢~ 冲鸭！${deerName}给${call}打call！🔥`,
+                    `好耶！🥳 ${call}今天超有干劲的！${deerName}都被感染啦~ 我们就像小火箭一样，嗖——地冲向目标吧！🚀✨`,
+                    `嘻嘻，${call}充满动力的样子真的闪闪发光呢！🌟 ${deerName}好喜欢这样的${call}~ 趁现在冲一把，${deerName}在后面给你加油助威！💪🔥`
+                ]
+            };
+        }
+        
+        let chatHistory = [];
+        
+        function loadChatHistory() {
+            const saved = localStorage.getItem('pomodoro_chat_history');
+            if (saved) {
+                chatHistory = JSON.parse(saved);
+                renderChatHistory();
+            }
+        }
+        
+        function saveChatHistory() {
+            if (chatHistory.length > 50) {
+                chatHistory = chatHistory.slice(-50);
+            }
+            localStorage.setItem('pomodoro_chat_history', JSON.stringify(chatHistory));
+        }
+        
+        function renderChatHistory() {
+            const container = document.querySelector('.chat-messages');
+            const systemMsg = container.querySelector('.system-message');
+            container.innerHTML = '';
+            if (systemMsg) container.appendChild(systemMsg);
+            
+            chatHistory.forEach(msg => {
+                if (msg.role === 'user') {
+                    addUserMessageElement(msg.text);
+                } else {
+                    addAiMessageElement(msg.text);
+                }
+            });
+        }
+        
+        function addUserMessageElement(text) {
+            const container = document.querySelector('.chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user';
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <svg viewBox="0 0 40 40" fill="none">
+                        <circle cx="20" cy="20" r="12" fill="#B5EAD7"/>
+                        <circle cx="16" cy="18" r="2.5" fill="#3D334A"/>
+                        <circle cx="24" cy="18" r="2.5" fill="#3D334A"/>
+                        <circle cx="17" cy="17" r="1" fill="white"/>
+                        <circle cx="25" cy="17" r="1" fill="white"/>
+                        <path d="M15 24 Q20 28 25 24" stroke="#3D334A" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <div class="message-bubble user">
+                    <p class="message-text user">${text}</p>
+                </div>
+            `;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function addAiMessageElement(text) {
+            const container = document.querySelector('.chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <svg viewBox="0 0 40 40" fill="none">
+                        <ellipse cx="15" cy="7" rx="2.8" ry="5" fill="#B07810" stroke="#6B4808" stroke-width="1" transform="rotate(-10 15 7)"/>
+                        <ellipse cx="25" cy="7" rx="2.8" ry="5" fill="#B07810" stroke="#6B4808" stroke-width="1" transform="rotate(10 25 7)"/>
+                        <circle cx="13" cy="3" r="1.2" fill="#D49818"/>
+                        <circle cx="17" cy="3" r="1.2" fill="#D49818"/>
+                        <circle cx="23" cy="3" r="1.2" fill="#D49818"/>
+                        <circle cx="27" cy="3" r="1.2" fill="#D49818"/>
+                        <ellipse cx="11" cy="14" rx="2.8" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1"/>
+                        <ellipse cx="29" cy="14" rx="2.8" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1"/>
+                        <ellipse cx="20" cy="22" rx="12" ry="10.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1.8"/>
+                        <ellipse cx="20" cy="25" rx="7.5" ry="5.5" fill="#FFE8B0"/>
+                        <ellipse cx="15" cy="20" rx="5" ry="4.5" fill="#2D1810" stroke="#1A0800" stroke-width="0.6"/>
+                        <ellipse cx="25" cy="20" rx="5" ry="4.5" fill="#2D1810" stroke="#1A0800" stroke-width="0.6"/>
+                        <circle cx="13.5" cy="18.5" r="1.4" fill="white"/>
+                        <circle cx="23.5" cy="18.5" r="1.4" fill="white"/>
+                        <circle cx="16" cy="20.5" r="0.8" fill="white"/>
+                        <circle cx="26" cy="20.5" r="0.8" fill="white"/>
+                        <circle cx="12.5" cy="17.5" r="0.6" fill="white" opacity="0.7"/>
+                        <circle cx="22.5" cy="17.5" r="0.6" fill="white" opacity="0.7"/>
+                        <g transform="translate(11,18) scale(0.35)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700" opacity="0.9"/></g>
+                        <g transform="translate(21,18) scale(0.35)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700" opacity="0.9"/></g>
+                        <ellipse cx="20" cy="25" rx="3" ry="2" fill="#FF8080" stroke="#C04040" stroke-width="0.6"/>
+                        <circle cx="20" cy="24.5" r="1.2" fill="#FFCCBB"/>
+                        <path d="M17 28 Q20 31 23 28" stroke="#3D2010" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+                        <circle cx="9" cy="23" r="3.5" fill="#FFCCAA" opacity="0.7"/>
+                        <circle cx="31" cy="23" r="3.5" fill="#FFCCAA" opacity="0.7"/>
+                    </svg>
+                </div>
+                <div class="message-bubble ai">
+                    <p class="message-text">${text}</p>
+                </div>
+            `;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function goBack() {
+            window.location.href = 'home.html';
+        }
+        
+        function selectEmotion(el) {
+            document.querySelectorAll('.emotion-tag').forEach(tag => {
+                tag.classList.remove('active');
+            });
+            el.classList.add('active');
+            
+            const emotion = el.querySelector('span').textContent;
+            const responses = getEmotionResponses()[emotion];
+            if (responses && responses.length > 0) {
+                const response = responses[Math.floor(Math.random() * responses.length)];
+                showTypingIndicator(() => {
+                    addAiMessage(response);
+                });
+            }
+        }
+        
+        function showTypingIndicator(callback) {
+            const container = document.querySelector('.chat-messages');
+            const indicatorDiv = document.createElement('div');
+            indicatorDiv.className = 'message';
+            indicatorDiv.id = 'typing-indicator';
+            indicatorDiv.innerHTML = `
+                <div class="message-avatar">
+                    <svg viewBox="0 0 40 40" fill="none">
+                        <ellipse cx="15" cy="7" rx="2.8" ry="5" fill="#B07810" stroke="#6B4808" stroke-width="1" transform="rotate(-10 15 7)"/>
+                        <ellipse cx="25" cy="7" rx="2.8" ry="5" fill="#B07810" stroke="#6B4808" stroke-width="1" transform="rotate(10 25 7)"/>
+                        <circle cx="13" cy="3" r="1.2" fill="#D49818"/>
+                        <circle cx="17" cy="3" r="1.2" fill="#D49818"/>
+                        <circle cx="23" cy="3" r="1.2" fill="#D49818"/>
+                        <circle cx="27" cy="3" r="1.2" fill="#D49818"/>
+                        <ellipse cx="11" cy="14" rx="2.8" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1"/>
+                        <ellipse cx="29" cy="14" rx="2.8" ry="3.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1"/>
+                        <ellipse cx="20" cy="22" rx="12" ry="10.5" fill="#F5CC60" stroke="#8B6010" stroke-width="1.8"/>
+                        <ellipse cx="20" cy="25" rx="7.5" ry="5.5" fill="#FFE8B0"/>
+                        <ellipse cx="15" cy="20" rx="5" ry="4.5" fill="#2D1810" stroke="#1A0800" stroke-width="0.6"/>
+                        <ellipse cx="25" cy="20" rx="5" ry="4.5" fill="#2D1810" stroke="#1A0800" stroke-width="0.6"/>
+                        <circle cx="13.5" cy="18.5" r="1.4" fill="white"/>
+                        <circle cx="23.5" cy="18.5" r="1.4" fill="white"/>
+                        <circle cx="16" cy="20.5" r="0.8" fill="white"/>
+                        <circle cx="26" cy="20.5" r="0.8" fill="white"/>
+                        <circle cx="12.5" cy="17.5" r="0.6" fill="white" opacity="0.7"/>
+                        <circle cx="22.5" cy="17.5" r="0.6" fill="white" opacity="0.7"/>
+                        <g transform="translate(11,18) scale(0.35)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700" opacity="0.9"/></g>
+                        <g transform="translate(21,18) scale(0.35)"><polygon points="0,-5 1.5,-1.5 5,-1.5 2.5,1 3.5,5 0,2.5 -3.5,5 -2.5,1 -5,-1.5 -1.5,-1.5" fill="#FFD700" opacity="0.9"/></g>
+                        <ellipse cx="20" cy="25" rx="3" ry="2" fill="#FF8080" stroke="#C04040" stroke-width="0.6"/>
+                        <circle cx="20" cy="24.5" r="1.2" fill="#FFCCBB"/>
+                        <path d="M17 28 Q20 31 23 28" stroke="#3D2010" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+                        <circle cx="9" cy="23" r="3.5" fill="#FFCCAA" opacity="0.7"/>
+                        <circle cx="31" cy="23" r="3.5" fill="#FFCCAA" opacity="0.7"/>
+                    </svg>
+                </div>
+                <div class="message-bubble ai">
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(indicatorDiv);
+            container.scrollTop = container.scrollHeight;
+            
+            setTimeout(() => {
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) indicator.remove();
+                callback();
+            }, 1500);
+        }
+        
+        function sendMessage() {
+            const input = document.querySelector('.chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            addUserMessage(message);
+            input.value = '';
+            
+            showTypingIndicator(() => {
+                const deerName = getDeerName();
+                const call = getDeerCall();
+                const responses = [
+                    `${call}说得对呢~ 🥰 ${deerName}会一直陪着你的！不管发生什么，${deerName}都在这里哦~`,
+                    `唔~ ${deerName}听懂了！${call}真棒，愿意说出来就是好的开始呢~ 💖 有什么事都可以和${deerName}说的！`,
+                    `嘻嘻，${call}的心思${deerName}都懂哦~ 😘 有什么想做的都告诉${deerName}吧，${deerName}帮你一起想办法！`,
+                    `嗯嗯！${deerName}收到啦~ 🐾 ${call}今天的状态真不错呢，继续保持下去哦~ ✨`,
+                    `哇！${call}说的好有道理呀！🥰 ${deerName}的小脑袋都亮起来啦~ 和${call}聊天好开心！`,
+                    `${call}你知道吗？${deerName}每次看到你努力的样子，都觉得好感动呢~ 🌟 你真的很棒很棒！`,
+                    `嘿嘿，${deerName}最喜欢听${call}说话了~ 🐾 声音好听，说的内容也超有意思，多说一点嘛！💕`,
+                    `呜~ ${deerName}收到${call}的心意啦！💖 不管${call}想做什么，${deerName}都会全力支持哒！冲鸭——！🔥`
+                ];
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addAiMessage(randomResponse);
+            });
+        }
+        
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function sendQuickMessage(type) {
+            const deerName = getDeerName();
+            const call = getDeerCall();
+            const userMessages = {
+                'tired': `${deerName}，我有点累了...`,
+                'unfocus': `我今天怎么也专注不下去，怎么办呀`,
+                'encourage': `${deerName}，给我一点鼓励好不好~`,
+                'chat': `${deerName}，我们来聊聊天吧！`
+            };
+            const aiResponses = {
+                'tired': `呜~ 摸摸头！🥺 ${call}辛苦啦，${deerName}帮你揉揉小脑袋~ 累了就休息一下嘛，去喝杯热水，或者站起来伸个懒腰，${deerName}会一直在这里等你回来的哦！💖`,
+                'unfocus': `哎呀，没关系哒~ 😘 ${deerName}最懂这种感觉了！要不我们先试试深呼吸三次，然后从最简单的小任务开始做起？${call}超棒的，一定可以慢慢进入状态哒！加油加油！💪`,
+                'encourage': `当然要鼓励${call}啦！😤 ${deerName}最喜欢${call}了！${call}每天都有在努力，真的超级厉害呢~ 不管今天完成了什么，都是值得骄傲的事情哦！${deerName}永远支持${call}！✨🔥`,
+                'chat': `好呀好呀！🥰 ${deerName}最喜欢和${call}聊天啦~ 今天有没有发生什么有趣的事情呀？或者有什么想和${deerName}分享的小秘密？${deerName}耳朵都竖起来啦，快说快说~ 🐾💕`
+            };
+            const userMsg = userMessages[type] || type;
+            const aiReply = aiResponses[type] || `${deerName}在听哦~ ${call}说什么${deerName}都喜欢听~ 😊`;
+            addUserMessage(userMsg);
+            showTypingIndicator(() => {
+                addAiMessage(aiReply);
+            });
+        }
+        
+        function addUserMessage(text) {
+            chatHistory.push({ role: 'user', text: text });
+            saveChatHistory();
+            addUserMessageElement(text);
+        }
+        
+        function addAiMessage(text) {
+            chatHistory.push({ role: 'ai', text: text });
+            saveChatHistory();
+            addAiMessageElement(text);
+        }
+        
+        function openPage(page) {
+            window.location.href = page;
+        }
+        
+        function clearChat() {
+            chatHistory = [];
+            localStorage.removeItem('pomodoro_chat_history');
+            const container = document.querySelector('.chat-messages');
+            const systemMsg = container.querySelector('.system-message');
+            container.innerHTML = '';
+            if (systemMsg) container.appendChild(systemMsg);
+        }
+        
+        loadChatHistory();
+        
+        function getDeerName() {
+            return localStorage.getItem('pomodoro_deer_name') || '小鹿';
+        }
+
+        function getDeerCall() {
+            return localStorage.getItem('pomodoro_deer_call') || '宝宝';
+        }
+
+        function loadProfile() {
+            const avatar = localStorage.getItem('pomodoro_avatar');
+            if (avatar) {
+                const avatarEl = document.getElementById('chat-avatar');
+                avatarEl.innerHTML = `<img src="${avatar}" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid white;">`;
+                avatarEl.classList.remove('deer-blinking');
+            }
+
+            const deerName = getDeerName();
+            const call = getDeerCall();
+            document.getElementById('chat-display-name').textContent = deerName + '陪伴官';
+
+            const welcome1 = document.getElementById('welcome-msg-1');
+            if (welcome1) welcome1.textContent = `呜~ ${deerName}来啦！🥰 今天${call}想聊什么呢？${deerName}会一直陪着你哒~ 💖`;
+            const welcome2 = document.getElementById('welcome-msg-2');
+            if (welcome2) welcome2.textContent = `摸摸头~ 🐾 ${call}不要难过嘛，焦虑的时候${deerName}会一直陪着你的哦~ 要不我们先吃一个小番茄吧？就25分钟，${deerName}陪你一起专注，好不好呀？😘`;
+
+            const wallpaper = localStorage.getItem('pomodoro_wallpaper');
+            const wallpaperColor = localStorage.getItem('pomodoro_wallpaper_color');
+            const messagesEl = document.querySelector('.chat-messages');
+            if (wallpaper) {
+                messagesEl.style.backgroundImage = `url(${wallpaper})`;
+                messagesEl.style.backgroundSize = 'cover';
+                messagesEl.style.backgroundPosition = 'center';
+                messagesEl.style.backgroundColor = '';
+            } else if (wallpaperColor && wallpaperColor !== 'default') {
+                messagesEl.style.backgroundImage = '';
+                messagesEl.style.backgroundColor = wallpaperColor;
+            } else {
+                messagesEl.style.backgroundImage = '';
+                messagesEl.style.backgroundColor = '';
+            }
+        }
+        
+        loadProfile();
+    </script>
+</body>
+</html>
